@@ -82,6 +82,48 @@
   @keyframes pop { from { transform: scale(.6); opacity: 0; } }
   @keyframes beat { 50% { transform: scale(1.15); } }
 
+  .buddy { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 8px; }
+  .bubble {
+    position: relative; background: var(--pink-soft); border-radius: 18px;
+    padding: 10px 16px; text-align: center; font-weight: 600; max-width: 90%;
+    animation: pop .35s ease;
+  }
+  .bubble::after {
+    content: ""; position: absolute; left: 50%; bottom: -8px; margin-left: -8px;
+    border: 8px solid transparent; border-bottom: 0; border-top-color: var(--pink-soft);
+  }
+  .avatar-wrap { width: 180px; height: 180px; margin-top: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .avatar {
+    width: 100%; height: 100%; display: block; user-select: none;
+    mix-blend-mode: multiply; /* blends the image's white background into the card */
+    transform-origin: 50% 90%;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .dots span { display: inline-block; animation: dot 1.4s infinite; }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+
+  .buddy.waiting .avatar { animation: wait 3.2s ease-in-out infinite; filter: saturate(.75); }
+  .buddy.happy .avatar { animation: jump .9s ease-in-out 3; }
+  .buddy.love .avatar { animation: beat .8s ease-in-out infinite; }
+  .buddy.poke .avatar { animation: wiggle .5s ease-in-out; }
+
+  @keyframes bob { 50% { transform: translateY(-6px); } }
+  @keyframes wait {
+    0%, 100% { transform: rotate(0) translateY(0); }
+    25% { transform: rotate(-6deg) translateY(3px); }
+    50% { transform: rotate(0) translateY(6px) scale(.97); }
+    75% { transform: rotate(6deg) translateY(3px); }
+  }
+  @keyframes jump {
+    0%, 100% { transform: translateY(0) scale(1); }
+    15% { transform: translateY(0) scale(1.08, .9); }
+    45% { transform: translateY(-34px) rotate(-8deg) scale(.95, 1.06); }
+    70% { transform: translateY(0) rotate(6deg) scale(1.06, .94); }
+  }
+  @keyframes wiggle { 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+  @keyframes dot { 0%, 60%, 100% { opacity: .25; } 30% { opacity: 1; } }
+
   .float { position: fixed; pointer-events: none; font-size: 1.6rem; animation: up 1.2s ease-out forwards; z-index: 20; }
   @keyframes up { to { transform: translateY(-140px) scale(1.4); opacity: 0; } }
 </style>
@@ -90,6 +132,13 @@
 <main>
   <h1>Kitty, can you give me some hearts? 🥺</h1>
   <p class="sub">Once we hit 100 hearts, we're officially together</p>
+
+  <section class="card buddy" id="buddy">
+    <div class="bubble" id="bubble"></div>
+    <div class="avatar-wrap" id="avatarWrap">
+      <img class="avatar" src="avatar.webp" alt="Heart buddy" draggable="false">
+    </div>
+  </section>
 
   <section class="card">
     <div class="count"><b id="total">0</b> <span>/ 100 hearts</span></div>
@@ -170,6 +219,34 @@
     const full = t >= GOAL;
     document.querySelectorAll("[data-add], #addCustom").forEach((b) => (b.disabled = full));
     $("undo").disabled = !gifts.length;
+    if (!$("buddy").classList.contains("happy")) setMood();
+  }
+
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  const HAPPY_LINES = ["Yay! Thank you, Kitty! 💕", "My heart is so full! 🥰", "Best. Day. Ever!", "Hehe, one step closer 😝"];
+  const POKE_LINES = ["Hehe, that tickles!", "Hi Kitty! 👋", "Got a heart for me? 🥺"];
+  const givenToday = () => {
+    const today = new Date().toDateString();
+    return gifts.some((g) => new Date(g.at).toDateString() === today);
+  };
+  let happyTimer;
+
+  function setMood(mood, line) {
+    if (!mood) {
+      if (total() >= GOAL) [mood, line] = ["love", "We're together now! 💖"];
+      else if (givenToday()) [mood, line] = ["content", "Thanks for today's heart! See you tomorrow 😊"];
+      else [mood, line] = ["waiting", `No heart today yet... I'm waiting <span class="dots"><span>.</span><span>.</span><span>.</span></span> 🥺`];
+    }
+    $("buddy").className = `card buddy ${mood}`;
+    $("bubble").innerHTML = line;
+    // restart the bubble pop animation
+    $("bubble").style.animation = "none"; void $("bubble").offsetWidth; $("bubble").style.animation = "";
+  }
+
+  function cheer() {
+    clearTimeout(happyTimer);
+    setMood("happy", pick(HAPPY_LINES));
+    happyTimer = setTimeout(() => setMood(), 2800);
   }
 
   function floatHearts(n) {
@@ -194,6 +271,7 @@
     n = Math.min(n, GOAL - before);
     gifts.push({ n, at: Date.now() });
     save();
+    cheer();
     render();
     floatHearts(n);
     if (total() >= GOAL) setTimeout(() => $("win").classList.add("show"), 600);
@@ -208,6 +286,14 @@
     if (confirm("Really clear all the hearts and start over? 🥲")) { gifts = []; save(); render(); }
   });
   $("closeWin").addEventListener("click", () => $("win").classList.remove("show"));
+  $("avatarWrap").addEventListener("click", () => {
+    if ($("buddy").classList.contains("happy")) return;
+    clearTimeout(happyTimer);
+    setMood("poke", pick(POKE_LINES));
+    happyTimer = setTimeout(() => setMood(), 1600);
+  });
+  // switch back to "waiting" when a new day starts
+  setInterval(() => { if (!$("buddy").classList.contains("happy")) setMood(); }, 60000);
 
   render();
 </script>
