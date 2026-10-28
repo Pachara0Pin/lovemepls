@@ -4,14 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hearts for Me</title>
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-    }
-  }
-</script>
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -100,15 +92,14 @@
     content: ""; position: absolute; left: 50%; bottom: -8px; margin-left: -8px;
     border: 8px solid transparent; border-bottom: 0; border-top-color: var(--pink-soft);
   }
-  .avatar-wrap { width: 260px; max-width: 100%; height: 260px; margin-top: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .avatar-wrap canvas { display: block; touch-action: pan-y; }
-  .avatar-wrap.is-3d .avatar { display: none; }
+  .avatar-wrap { width: 280px; max-width: 100%; aspect-ratio: 1; margin-top: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .avatar {
-    width: 100%; height: 100%; display: block; user-select: none;
-    mix-blend-mode: multiply; /* blends the image's white background into the card */
+    position: relative; width: 100%; height: 100%; user-select: none;
     transform-origin: 50% 90%;
     animation: bob 2.4s ease-in-out infinite;
   }
+  .avatar img, .avatar svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .avatar img { mix-blend-mode: multiply; } /* blends the image's white background into the card */
   .dots span { display: inline-block; animation: dot 1.4s infinite; }
   .dots span:nth-child(2) { animation-delay: .2s; }
   .dots span:nth-child(3) { animation-delay: .4s; }
@@ -134,6 +125,58 @@
   @keyframes wiggle { 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
   @keyframes dot { 0%, 60%, 100% { opacity: .25; } 30% { opacity: 1; } }
 
+  /* ---- animated face drawn over bear.webp (its own eyes and mouth were painted out) ---- */
+  .face * { transform-box: fill-box; transform-origin: center; }
+  .face .e-closed, .face .e-heart, .face .e-poke,
+  .face .m-tongue, .face .m-open, .face .m-frown, .face .tear { display: none; }
+
+  /* waiting: big watery puppy eyes looking up, trembling frown */
+  .buddy.waiting .tear { display: inline; animation: shimmer 1.6s ease-in-out infinite; }
+  .buddy.waiting .iris { animation: puppy 7s ease-in-out infinite; }
+  .buddy.waiting .m-smile { display: none; }
+  .buddy.waiting .m-frown { display: inline; animation: tremble .5s ease-in-out infinite; }
+
+  /* content: glancing around, little ω smile */
+  .buddy.content .iris { animation: glance 6s ease-in-out infinite; }
+
+  /* happy: the original wink + tongue out, tongue wiggling */
+  .buddy.happy .eye-r .e-open { display: none; }
+  .buddy.happy .eye-r .e-closed { display: inline; }
+  .buddy.happy .m-smile { display: none; }
+  .buddy.happy .m-tongue { display: inline; }
+  .buddy.happy .tongue { transform-origin: 30% 10%; animation: lick .35s ease-in-out infinite alternate; }
+
+  /* love: heart eyes, big smile */
+  .buddy.love .e-open { display: none; }
+  .buddy.love .e-heart { display: inline; animation: beat .8s ease-in-out infinite; }
+  .buddy.love .m-smile { display: none; }
+  .buddy.love .m-open { display: inline; }
+
+  /* poke: > < squeeze, laughing */
+  .buddy.poke .e-open { display: none; }
+  .buddy.poke .e-poke { display: inline; }
+  .buddy.poke .m-smile { display: none; }
+  .buddy.poke .m-open { display: inline; animation: laugh .2s ease-in-out infinite alternate; }
+
+  .e-open { animation: blink 4.2s infinite; }
+  .eye-r .e-open { animation-delay: .04s; }
+
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+  @keyframes glance {
+    0%, 20% { transform: translate(0, 0); }
+    30%, 50% { transform: translate(-14px, 4px); }
+    60%, 80% { transform: translate(12px, -6px); }
+  }
+  @keyframes puppy {
+    0%, 40% { transform: translate(0, -10px) scale(1.08); }
+    50%, 90% { transform: translate(-10px, 16px) scale(1); }
+    100% { transform: translate(0, -10px) scale(1.08); }
+  }
+  @keyframes shimmer { 50% { opacity: .35; } }
+  @keyframes tremble { 50% { transform: translateY(2px) scaleX(.94); } }
+  @keyframes lick { to { transform: rotate(12deg) scaleY(1.08); } }
+  @keyframes laugh { to { transform: scaleY(.75); } }
+
   .float { position: fixed; pointer-events: none; font-size: 1.6rem; animation: up 1.2s ease-out forwards; z-index: 20; }
   @keyframes up { to { transform: translateY(-140px) scale(1.4); opacity: 0; } }
 </style>
@@ -146,7 +189,74 @@
   <section class="card buddy" id="buddy">
     <div class="bubble" id="bubble"></div>
     <div class="avatar-wrap" id="avatarWrap">
-      <img class="avatar" src="avatar.webp" alt="Heart buddy" draggable="false">
+      <div class="avatar">
+        <img src="bear.webp" alt="Bear buddy with glasses" draggable="false">
+        <svg class="face" viewBox="0 0 1254 1254" aria-hidden="true">
+          <defs>
+            <radialGradient id="irisGrad" cx="40%" cy="35%" r="70%">
+              <stop offset="0" stop-color="#8a4a26"/>
+              <stop offset=".55" stop-color="#4a200e"/>
+              <stop offset="1" stop-color="#250c05"/>
+            </radialGradient>
+            <clipPath id="eyeClip"><ellipse cx="-6" rx="85" ry="80"/></clipPath>
+            <path id="heartEye" d="M0 40C-70-10-70-70-30-70C-10-70 0-55 0-45C0-55 10-70 30-70C70-70 70-10 0 40Z"/>
+          </defs>
+
+          <g class="eye eye-l" transform="translate(485 563) rotate(-8)">
+            <g class="e-open">
+              <ellipse rx="98" ry="92" fill="#1d0d07"/>
+              <ellipse cx="-6" rx="85" ry="80" fill="#fff"/>
+              <g clip-path="url(#eyeClip)">
+                <g class="iris">
+                  <ellipse cx="16" cy="4" rx="66" ry="74" fill="url(#irisGrad)"/>
+                  <ellipse cx="18" cy="8" rx="36" ry="42" fill="#160603"/>
+                  <circle cx="44" cy="-30" r="22" fill="#fff"/>
+                  <circle cx="-6" cy="40" r="9" fill="#fff" opacity=".85"/>
+                </g>
+              </g>
+              <ellipse class="tear" cx="-4" cy="60" rx="52" ry="9" fill="#fff" opacity=".7"/>
+            </g>
+            <path class="e-closed" d="M-72 18Q0-58 72 18" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round"/>
+            <g class="e-heart"><use href="#heartEye" transform="translate(0 22) scale(1.55)" fill="#ff4b6e"/><ellipse cx="-40" cy="-48" rx="15" ry="9" fill="#fff" opacity=".85"/></g>
+            <path class="e-poke" d="M-50-45L45 0-50 45" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <g class="eye eye-r" transform="translate(848 490) rotate(-8)">
+            <g class="e-open">
+              <ellipse rx="98" ry="92" fill="#1d0d07"/>
+              <ellipse cx="-6" rx="85" ry="80" fill="#fff"/>
+              <g clip-path="url(#eyeClip)">
+                <g class="iris">
+                  <ellipse cx="16" cy="4" rx="66" ry="74" fill="url(#irisGrad)"/>
+                  <ellipse cx="18" cy="8" rx="36" ry="42" fill="#160603"/>
+                  <circle cx="44" cy="-30" r="22" fill="#fff"/>
+                  <circle cx="-6" cy="40" r="9" fill="#fff" opacity=".85"/>
+                </g>
+              </g>
+              <ellipse class="tear" cx="-4" cy="60" rx="52" ry="9" fill="#fff" opacity=".7"/>
+            </g>
+            <path class="e-closed" d="M-72 18Q0-58 72 18" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round"/>
+            <g class="e-heart"><use href="#heartEye" transform="translate(0 22) scale(1.55)" fill="#ff4b6e"/><ellipse cx="-40" cy="-48" rx="15" ry="9" fill="#fff" opacity=".85"/></g>
+            <path class="e-poke" d="M50-45L-45 0 50 45" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <g class="mouth" transform="translate(692 668) rotate(-14)">
+            <path class="m-smile" d="M-58-18Q-30 22 0-8Q30 22 58-18" fill="none" stroke="#3b160c" stroke-width="11" stroke-linecap="round"/>
+            <path class="m-frown" d="M-38 22Q0-12 38 22" fill="none" stroke="#3b160c" stroke-width="11" stroke-linecap="round"/>
+            <g class="m-tongue">
+              <path d="M-88-14Q-10 22 80-66Q96 30 30 76Q-40 92-88-14Z" fill="#4b1010"/>
+              <g class="tongue">
+                <path d="M-8 26Q40 4 74 22Q86 84 42 96Q2 102-6 62Z" fill="#f37a8d"/>
+                <path d="M34 26L38 72" stroke="#d85a70" stroke-width="5" stroke-linecap="round"/>
+              </g>
+            </g>
+            <g class="m-open">
+              <path d="M-70-12Q0 8 70-12Q62 66 0 74Q-62 66-70-12Z" fill="#4b1010"/>
+              <ellipse cx="8" cy="52" rx="34" ry="18" fill="#f37a8d"/>
+            </g>
+          </g>
+        </svg>
+      </div>
     </div>
   </section>
 
@@ -306,7 +416,5 @@
   setInterval(() => { if (!$("buddy").classList.contains("happy")) setMood(); }, 60000);
 
   render();
-</script>
-<script type="module" src="avatar3d.js"></script>
-</body>
+</script></body>
 </html>
