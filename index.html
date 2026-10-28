@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hearts for Me</title>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -92,7 +100,9 @@
     content: ""; position: absolute; left: 50%; bottom: -8px; margin-left: -8px;
     border: 8px solid transparent; border-bottom: 0; border-top-color: var(--pink-soft);
   }
-  .avatar-wrap { width: 180px; height: 180px; margin-top: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .avatar-wrap { width: 260px; max-width: 100%; height: 260px; margin-top: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .avatar-wrap canvas { display: block; touch-action: pan-y; }
+  .avatar-wrap.is-3d .avatar { display: none; }
   .avatar {
     width: 100%; height: 100%; display: block; user-select: none;
     mix-blend-mode: multiply; /* blends the image's white background into the card */
@@ -297,5 +307,6 @@
 
   render();
 </script>
+<script type="module" src="avatar3d.js"></script>
 </body>
 </html>
