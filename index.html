@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearts for Me</title>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff5f8;
+    --card: #ffffff;
+    --pink: #ff5c8a;
+    --pink-soft: #ffd1de;
+    --text: #4a2b36;
+    --muted: #a27d89;
+    --empty: #f3e3e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Mali", system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 48px;
+  }
+  main { width: 100%; max-width: 520px; }
+  h1 { text-align: center; font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { text-align: center; color: var(--muted); margin: 0 0 20px; }
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(255, 92, 138, .12);
+    margin-bottom: 16px;
+  }
+  .count { text-align: center; }
+  .count b { font-size: 3rem; color: var(--pink); }
+  .count span { color: var(--muted); }
+  .bar { height: 14px; background: var(--empty); border-radius: 99px; overflow: hidden; margin: 12px 0 4px; }
+  .bar div { height: 100%; width: 0; background: linear-gradient(90deg, #ff9ab6, var(--pink)); transition: width .4s ease; }
+  .left { text-align: center; color: var(--muted); font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+  .grid svg { width: 100%; height: auto; display: block; }
+  .btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  button {
+    font: inherit; font-weight: 600;
+    border: none; border-radius: 16px;
+    padding: 14px 8px;
+    background: var(--pink-soft); color: var(--text);
+    cursor: pointer; transition: transform .1s;
+  }
+  button:active { transform: scale(.95); }
+  button.main { background: var(--pink); color: #fff; }
+  button:disabled { opacity: .4; cursor: default; }
+  .custom { display: flex; gap: 10px; margin-top: 10px; }
+  .custom input {
+    flex: 1; min-width: 0; font: inherit;
+    border: 2px solid var(--pink-soft); border-radius: 16px;
+    padding: 12px; text-align: center; color: var(--text);
+  }
+  .custom input:focus { outline: none; border-color: var(--pink); }
+  .tools { display: flex; justify-content: space-between; margin-top: 12px; }
+  .tools button { background: none; color: var(--muted); padding: 6px; font-weight: 400; font-size: .9rem; }
+  .log { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; font-size: .9rem; }
+  .log li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--pink-soft); }
+  .log li span { color: var(--muted); }
+  .log .empty { color: var(--muted); justify-content: center; border: none; }
+  h2 { font-size: 1rem; margin: 0 0 8px; }
+
+  .win {
+    position: fixed; inset: 0; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(255, 245, 248, .92); z-index: 10; padding: 16px;
+  }
+  .win.show { display: flex; }
+  .win .card { text-align: center; max-width: 360px; animation: pop .5s ease; }
+  .win .big { font-size: 4rem; animation: beat 1s infinite; }
+  .win h2 { font-size: 1.5rem; color: var(--pink); }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } }
+  @keyframes beat { 50% { transform: scale(1.15); } }
+
+  .float { position: fixed; pointer-events: none; font-size: 1.6rem; animation: up 1.2s ease-out forwards; z-index: 20; }
+  @keyframes up { to { transform: translateY(-140px) scale(1.4); opacity: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kitty, can you give me some hearts? 🥺</h1>
+  <p class="sub">Once we hit 100 hearts, we're officially together</p>
+
+  <section class="card">
+    <div class="count"><b id="total">0</b> <span>/ 100 hearts</span></div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="left" id="left"></div>
+  </section>
+
+  <section class="card">
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="card">
+    <div class="btns">
+      <button data-add="0.5">+ ½ heart</button>
+      <button data-add="1" class="main">+ 1 heart</button>
+      <button data-add="5">+ 5 hearts</button>
+    </div>
+    <div class="custom">
+      <input id="amount" type="number" min="0.5" step="0.5" placeholder="Any amount you like (e.g. 2.5)">
+      <button id="addCustom" class="main">Give</button>
+    </div>
+    <div class="tools">
+      <button id="undo">↩︎ Undo last</button>
+      <button id="reset">Start over</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Heart history</h2>
+    <ul class="log" id="log"></ul>
+  </section>
+</main>
+
+<div class="win" id="win">
+  <div class="card">
+    <div class="big">💖</div>
+    <h2>100 hearts!</h2>
+    <p>From today on, you're my girlfriend, Kitty 🥰</p>
+    <button class="main" id="closeWin">Yesss</button>
+  </div>
+</div>
+
+<script>
+  const GOAL = 100;
+  const KEY = "lovemepls-hearts";
+  const HEART = "M12 21s-7.5-4.6-9.6-9.2C.9 8.6 2.8 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.8 0 5.7 4.1 4.2 7.3C19.5 16.4 12 21 12 21z";
+
+  let gifts = [];
+  try { gifts = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+
+  const $ = (id) => document.getElementById(id);
+  const total = () => Math.min(GOAL, gifts.reduce((s, g) => s + g.n, 0));
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(gifts)); } catch (e) {} };
+  const fmt = (n) => (Number.isInteger(n) ? n : n.toFixed(1));
+
+  function heartSvg(fill, i) {
+    // fill: 0 = empty, 0.5 = half, 1 = full
+    return `<svg viewBox="0 0 24 24"><defs><clipPath id="c${i}"><rect width="${24 * fill}" height="24"/></clipPath></defs>
+      <path d="${HEART}" fill="var(--empty)"/>
+      ${fill ? `<path d="${HEART}" fill="var(--pink)" clip-path="url(#c${i})"/>` : ""}</svg>`;
+  }
+
+  function render() {
+    const t = total();
+    $("total").textContent = fmt(t);
+    $("bar").style.width = (t / GOAL) * 100 + "%";
+    $("left").textContent = t >= GOAL ? "Done! We're a couple now 💕" : `Only ${fmt(GOAL - t)} more to go!`;
+
+    let html = "";
+    for (let i = 0; i < GOAL; i++) html += heartSvg(Math.max(0, Math.min(1, t - i)), i);
+    $("grid").innerHTML = html;
+
+    $("log").innerHTML = gifts.length
+      ? gifts.slice().reverse().map((g) =>
+          `<li>💗 Gave ${fmt(g.n)} ${g.n > 1 ? "hearts" : "heart"} <span>${new Date(g.at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })}</span></li>`).join("")
+      : `<li class="empty">None yet... still waiting</li>`;
+
+    const full = t >= GOAL;
+    document.querySelectorAll("[data-add], #addCustom").forEach((b) => (b.disabled = full));
+    $("undo").disabled = !gifts.length;
+  }
+
+  function floatHearts(n) {
+    const count = Math.min(12, Math.ceil(n * 2));
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement("div");
+      el.className = "float";
+      el.textContent = "💗";
+      el.style.left = 20 + Math.random() * 60 + "vw";
+      el.style.top = 60 + Math.random() * 20 + "vh";
+      el.style.animationDelay = i * 60 + "ms";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500 + i * 60);
+    }
+  }
+
+  function give(n) {
+    n = Math.round(n * 2) / 2; // round to the nearest half heart
+    if (!(n > 0)) return;
+    const before = total();
+    if (before >= GOAL) return;
+    n = Math.min(n, GOAL - before);
+    gifts.push({ n, at: Date.now() });
+    save();
+    render();
+    floatHearts(n);
+    if (total() >= GOAL) setTimeout(() => $("win").classList.add("show"), 600);
+  }
+
+  document.querySelectorAll("[data-add]").forEach((b) =>
+    b.addEventListener("click", () => give(parseFloat(b.dataset.add))));
+  $("addCustom").addEventListener("click", () => { give(parseFloat($("amount").value)); $("amount").value = ""; });
+  $("amount").addEventListener("keydown", (e) => { if (e.key === "Enter") $("addCustom").click(); });
+  $("undo").addEventListener("click", () => { gifts.pop(); save(); render(); });
+  $("reset").addEventListener("click", () => {
+    if (confirm("Really clear all the hearts and start over? 🥲")) { gifts = []; save(); render(); }
+  });
+  $("closeWin").addEventListener("click", () => $("win").classList.remove("show"));
+
+  render();
+</script>
+</body>
+</html>
