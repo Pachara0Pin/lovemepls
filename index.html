@@ -62,6 +62,9 @@
     padding: 12px; text-align: center; color: var(--text);
   }
   .custom input:focus { outline: none; border-color: var(--pink); }
+  .take { width: 100%; margin-top: 10px; background: none; border: 2px dashed var(--pink-soft); color: var(--muted); font-weight: 400; }
+  .ask-btns { display: grid; gap: 8px; margin-top: 14px; }
+  .ask-btns .quiet { background: none; color: var(--muted); font-weight: 400; }
   .tools { display: flex; justify-content: space-between; margin-top: 12px; }
   .tools button { background: none; color: var(--muted); padding: 6px; font-weight: 400; font-size: .9rem; }
   .log { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; font-size: .9rem; }
@@ -128,7 +131,22 @@
   /* ---- animated face drawn over bear.webp (its own eyes and mouth were painted out) ---- */
   .face * { transform-box: fill-box; transform-origin: center; }
   .face .e-closed, .face .e-heart, .face .e-poke,
-  .face .m-tongue, .face .m-open, .face .m-frown, .face .tear { display: none; }
+  .face .m-tongue, .face .m-open, .face .m-frown, .face .tear,
+  .face .e-cry, .face .tears, .face .m-cry { display: none; }
+
+  /* cry: a heart was taken back — eyes squeezed shut, tears streaming, wailing */
+  .buddy.cry .avatar { animation: sob .3s ease-in-out infinite; filter: saturate(.8); }
+  .buddy.cry .e-open { display: none; }
+  .buddy.cry .e-cry, .buddy.cry .tears { display: inline; }
+  .buddy.cry .stream { animation: stream .9s ease-in-out infinite alternate; }
+  .buddy.cry .drop { animation: drip 1s ease-in infinite; }
+  .buddy.cry .drop:nth-of-type(2) { animation-delay: .5s; }
+  .buddy.cry .m-smile { display: none; }
+  .buddy.cry .m-cry { display: inline; animation: wail .25s ease-in-out infinite alternate; }
+  @keyframes sob { 50% { transform: translateY(3px) scale(1.01, .98); } }
+  @keyframes stream { from { transform: scaleY(.85); opacity: .75; } to { transform: scaleY(1.05); opacity: .95; } }
+  @keyframes drip { from { transform: translateY(0); opacity: 1; } to { transform: translateY(120px); opacity: 0; } }
+  @keyframes wail { to { transform: scale(1.08, .85); } }
 
   /* waiting: big watery puppy eyes looking up, trembling frown */
   .buddy.waiting .tear { display: inline; animation: shimmer 1.6s ease-in-out infinite; }
@@ -218,6 +236,12 @@
             </g>
             <path class="e-closed" d="M-72 18Q0-58 72 18" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round"/>
             <g class="e-heart"><use href="#heartEye" transform="translate(0 22) scale(1.55)" fill="#ff4b6e"/><ellipse cx="-40" cy="-48" rx="15" ry="9" fill="#fff" opacity=".85"/></g>
+            <path class="e-cry" d="M-72 4Q0 40 72 4" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round"/>
+            <g class="tears">
+              <path class="stream" d="M-80 14Q-84 90 -74 170Q-66 186 -58 170Q-50 90 -54 14Z" fill="#8fd3ff" opacity=".9"/>
+              <circle class="drop" cx="-66" cy="180" r="13" fill="#8fd3ff"/>
+              <circle class="drop" cx="-66" cy="180" r="10" fill="#b5e3ff"/>
+            </g>
             <path class="e-poke" d="M-50-45L45 0-50 45" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
           </g>
 
@@ -237,6 +261,12 @@
             </g>
             <path class="e-closed" d="M-72 18Q0-58 72 18" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round"/>
             <g class="e-heart"><use href="#heartEye" transform="translate(0 22) scale(1.55)" fill="#ff4b6e"/><ellipse cx="-40" cy="-48" rx="15" ry="9" fill="#fff" opacity=".85"/></g>
+            <path class="e-cry" d="M-72 4Q0 40 72 4" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round"/>
+            <g class="tears">
+              <path class="stream" d="M52 14Q48 90 58 170Q66 186 74 170Q82 90 78 14Z" fill="#8fd3ff" opacity=".9"/>
+              <circle class="drop" cx="66" cy="180" r="13" fill="#8fd3ff"/>
+              <circle class="drop" cx="66" cy="180" r="10" fill="#b5e3ff"/>
+            </g>
             <path class="e-poke" d="M50-45L-45 0 50 45" fill="none" stroke="#2a1209" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
           </g>
 
@@ -249,6 +279,10 @@
                 <path d="M-8 26Q40 4 74 22Q86 84 42 96Q2 102-6 62Z" fill="#f37a8d"/>
                 <path d="M34 26L38 72" stroke="#d85a70" stroke-width="5" stroke-linecap="round"/>
               </g>
+            </g>
+            <g class="m-cry">
+              <path d="M-62 34Q0-46 62 34Q0 52-62 34Z" fill="#4b1010"/>
+              <ellipse cx="0" cy="30" rx="28" ry="10" fill="#f37a8d"/>
             </g>
             <g class="m-open">
               <path d="M-70-12Q0 8 70-12Q62 66 0 74Q-62 66-70-12Z" fill="#4b1010"/>
@@ -280,6 +314,7 @@
       <input id="amount" type="number" min="0.5" step="0.5" placeholder="Any amount you like (e.g. 2.5)">
       <button id="addCustom" class="main">Give</button>
     </div>
+    <button id="take" class="take">− 1 heart 💔</button>
     <div class="tools">
       <button id="undo">↩︎ Undo last</button>
       <button id="reset">Start over</button>
@@ -298,6 +333,18 @@
     <h2>100 hearts!</h2>
     <p>From today on, you're my girlfriend, Kitty 🥰</p>
     <button class="main" id="closeWin">Yesss</button>
+  </div>
+</div>
+
+<div class="win" id="ask">
+  <div class="card">
+    <div class="big" id="askEmoji"></div>
+    <h2 id="askTitle"></h2>
+    <p id="askText"></p>
+    <div class="ask-btns">
+      <button class="main" id="askNo"></button>
+      <button class="quiet" id="askYes"></button>
+    </div>
   </div>
 </div>
 
@@ -333,13 +380,14 @@
 
     $("log").innerHTML = gifts.length
       ? gifts.slice().reverse().map((g) =>
-          `<li>💗 Gave ${fmt(g.n)} ${g.n > 1 ? "hearts" : "heart"} <span>${new Date(g.at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })}</span></li>`).join("")
+          `<li>${g.n > 0 ? "💗 Gave" : "💔 Took back"} ${fmt(Math.abs(g.n))} ${Math.abs(g.n) > 1 ? "hearts" : "heart"} <span>${new Date(g.at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })}</span></li>`).join("")
       : `<li class="empty">None yet... still waiting</li>`;
 
     const full = t >= GOAL;
     document.querySelectorAll("[data-add], #addCustom").forEach((b) => (b.disabled = full));
     $("undo").disabled = !gifts.length;
-    if (!$("buddy").classList.contains("happy")) setMood();
+    $("take").disabled = t <= 0;
+    if (!moodHeld) setMood();
   }
 
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -347,9 +395,10 @@
   const POKE_LINES = ["Hehe, that tickles!", "Hi Kitty! 👋", "Got a heart for me? 🥺"];
   const givenToday = () => {
     const today = new Date().toDateString();
-    return gifts.some((g) => new Date(g.at).toDateString() === today);
+    return gifts.some((g) => g.n > 0 && new Date(g.at).toDateString() === today);
   };
   let happyTimer;
+  let moodHeld = false; // while true, render() leaves the bear's current reaction alone
 
   function setMood(mood, line) {
     if (!mood) {
@@ -363,10 +412,52 @@
     $("bubble").style.animation = "none"; void $("bubble").offsetWidth; $("bubble").style.animation = "";
   }
 
-  function cheer() {
+  // show a reaction for a while (or until released when ms is omitted), then go back to the normal mood
+  function react(mood, line, ms) {
     clearTimeout(happyTimer);
-    setMood("happy", pick(HAPPY_LINES));
-    happyTimer = setTimeout(() => setMood(), 2800);
+    moodHeld = true;
+    setMood(mood, line);
+    if (ms) happyTimer = setTimeout(release, ms);
+  }
+  function release() {
+    clearTimeout(happyTimer);
+    moodHeld = false;
+    setMood();
+  }
+  const cheer = () => react("happy", pick(HAPPY_LINES), 2800);
+
+  function ask({ emoji, title, text, no, yes }) {
+    $("askEmoji").textContent = emoji;
+    $("askTitle").textContent = title;
+    $("askText").textContent = text;
+    $("askNo").textContent = no;
+    $("askYes").textContent = yes;
+    $("ask").classList.add("show");
+    return new Promise((resolve) => {
+      const done = (answer) => { $("ask").classList.remove("show"); resolve(answer); };
+      $("askNo").onclick = () => done(false);
+      $("askYes").onclick = () => done(true);
+    });
+  }
+
+  async function takeOne() {
+    const n = Math.min(1, total());
+    if (!(n > 0)) return;
+    react("waiting", "Nooo, please don't take it 🥺");
+    const sure = await ask({
+      emoji: "🥺", title: "Take back a heart?",
+      text: "Are you sure you want to take one heart back from me?",
+      no: "No, keep it 💕", yes: "Yes...",
+    }) && await ask({
+      emoji: "😭", title: "Really, really?",
+      text: "The bear will be so sad... Are you 100% sure?",
+      no: "Okay, I'll keep it 💕", yes: "Yes, I'm sure",
+    });
+    if (!sure) return react("happy", "Phew! Thank you, Kitty 🥰", 2200);
+    gifts.push({ n: -n, at: Date.now() });
+    save();
+    react("cry", "Waaah... my heart 💔😭", 3500);
+    render();
   }
 
   function floatHearts(n) {
@@ -401,19 +492,18 @@
     b.addEventListener("click", () => give(parseFloat(b.dataset.add))));
   $("addCustom").addEventListener("click", () => { give(parseFloat($("amount").value)); $("amount").value = ""; });
   $("amount").addEventListener("keydown", (e) => { if (e.key === "Enter") $("addCustom").click(); });
+  $("take").addEventListener("click", takeOne);
   $("undo").addEventListener("click", () => { gifts.pop(); save(); render(); });
   $("reset").addEventListener("click", () => {
     if (confirm("Really clear all the hearts and start over? 🥲")) { gifts = []; save(); render(); }
   });
   $("closeWin").addEventListener("click", () => $("win").classList.remove("show"));
   $("avatarWrap").addEventListener("click", () => {
-    if ($("buddy").classList.contains("happy")) return;
-    clearTimeout(happyTimer);
-    setMood("poke", pick(POKE_LINES));
-    happyTimer = setTimeout(() => setMood(), 1600);
+    if (moodHeld) return;
+    react("poke", pick(POKE_LINES), 1600);
   });
   // switch back to "waiting" when a new day starts
-  setInterval(() => { if (!$("buddy").classList.contains("happy")) setMood(); }, 60000);
+  setInterval(() => { if (!moodHeld) setMood(); }, 60000);
 
   render();
 </script></body>
