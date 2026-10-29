@@ -65,6 +65,22 @@
   .custom input:focus { outline: none; border-color: var(--pink); }
   .take { width: 100%; margin-top: 10px; background: none; border: 2px dashed var(--pink-soft); color: var(--muted); font-weight: 400; }
   .ask-btns { display: grid; gap: 8px; margin-top: 14px; }
+  .ask-btns .main { order: -1; }
+  .coupons { display: grid; gap: 10px; }
+  .coupon {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    border: 2px dashed var(--pink-soft); border-radius: 18px; background: #fffafc;
+  }
+  .coupon .c-icon { font-size: 2rem; }
+  .coupon .c-body { flex: 1; min-width: 0; }
+  .coupon .c-body b { color: var(--pink); }
+  .coupon .c-body p { margin: 2px 0; font-size: .9rem; }
+  .coupon .c-body small { color: var(--muted); font-size: .75rem; }
+  .coupon button { padding: 10px 14px; flex-shrink: 0; }
+  .coupon.locked { filter: grayscale(1); opacity: .55; }
+  .coupon.ready { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(255, 92, 138, .12); animation: glow 2s ease-in-out infinite; }
+  .coupon.used { border-style: solid; background: var(--pink-soft); }
+  @keyframes glow { 50% { box-shadow: 0 0 0 8px rgba(255, 92, 138, .06); } }
   .ask-btns .quiet { background: none; color: var(--muted); font-weight: 400; }
   .tools { display: flex; justify-content: space-between; margin-top: 12px; }
   .tools button { background: none; color: var(--muted); padding: 6px; font-weight: 400; font-size: .9rem; }
@@ -128,6 +144,9 @@
   .wardrobe .opts button { padding: 8px 2px; font-size: .8rem; font-weight: 400; background: var(--empty); line-height: 1.2; }
   .wardrobe .opts button.on { background: var(--pink); color: #fff; font-weight: 600; }
   .wardrobe .opts button i { display: block; font-style: normal; font-size: 1.3rem; }
+  .wardrobe .opts button small { display: none; font-size: .7rem; }
+  .wardrobe .opts button.locked { opacity: .5; }
+  .wardrobe .opts button.locked small { display: block; }
   .dots span { display: inline-block; animation: dot 1.4s infinite; }
   .dots span:nth-child(2) { animation-delay: .2s; }
   .dots span:nth-child(3) { animation-delay: .4s; }
@@ -486,6 +505,11 @@
   </section>
 
   <section class="card">
+    <h2>🎁 Love coupons</h2>
+    <div class="coupons" id="coupons"></div>
+  </section>
+
+  <section class="card">
     <div class="grid" id="grid"></div>
   </section>
 
@@ -537,7 +561,7 @@
 
 <div class="win letter" id="seeBox">
   <div class="card">
-    <div class="big">💗</div>
+    <div class="big" id="seeEmoji"></div>
     <h2 id="seeTitle"></h2>
     <p class="note" id="seeNote"></p>
     <p class="when" id="seeWhen"></p>
@@ -607,6 +631,8 @@
     document.querySelectorAll("[data-add], #addCustom").forEach((b) => (b.disabled = full));
     $("undo").disabled = !gifts.length;
     $("take").disabled = t <= 0;
+    renderCoupons();
+    wear(outfit); // refresh outfit locks
     if (!moodHeld) setMood();
   }
 
@@ -678,14 +704,22 @@
   function showHeart(i) {
     const g = heartOwners()[i * 2];
     if (!g) return;
-    $("seeTitle").textContent = `Heart #${i + 1}`;
-    $("seeNote").textContent = g.note || "No message with this one 🤫";
-    $("seeNote").className = g.note ? "note" : "note none";
-    $("seeWhen").textContent = `Kitty gave ${hearts(g.n)} on ${new Date(g.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`;
+    popup("💗", `Heart #${i + 1}`, g.note, `Kitty gave ${hearts(g.n)} on ${new Date(g.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`);
+    if (!g.note) $("seeNote").textContent = "No message with this one 🤫";
+  }
+
+  function popup(emoji, title, text, sub = "") {
+    $("seeEmoji").textContent = emoji;
+    $("seeTitle").textContent = title;
+    $("seeNote").textContent = text;
+    $("seeNote").className = text ? "note" : "note none";
+    $("seeWhen").textContent = sub;
     $("seeBox").classList.add("show");
   }
 
-  function ask({ emoji, title, text, no, yes }) {
+  function ask({ emoji, title, text, no, yes, yesMain = false }) {
+    $("askYes").className = yesMain ? "main" : "quiet";
+    $("askNo").className = yesMain ? "quiet" : "main";
     $("askEmoji").textContent = emoji;
     $("askTitle").textContent = title;
     $("askText").textContent = text;
@@ -721,9 +755,10 @@
   // ---------- wardrobe: Kitty picks the bear's hat, shirt and pants ----------
   const OUTFIT_KEY = "lovemepls-outfit";
   const WARDROBE = {
-    hat: ["Hat", [["🚫", "None"], ["🧢", "Cap"], ["🧶", "Beanie"], ["🤠", "Cowboy"], ["🎩", "Top hat"], ["🎣", "Bucket"]]],
-    shirt: ["Shirt", [["🚫", "None"], ["🧥", "Hoodie"], ["⚓", "Stripes"], ["🟥", "Flannel"], ["⚽", "Jersey"], ["🤵", "Tux"]]],
-    pants: ["Pants", [["🚫", "None"], ["👖", "Denim"], ["🟫", "Khaki"], ["🟩", "Plaid"], ["🏃", "Sport"], ["🎒", "Cargo"]]],
+    // [icon, name, hearts needed to unlock]
+    hat: ["Hat", [["🚫", "None", 0], ["🧢", "Cap", 0], ["🧶", "Beanie", 5], ["🤠", "Cowboy", 20], ["🎩", "Top hat", 60], ["🎣", "Bucket", 35]]],
+    shirt: ["Shirt", [["🚫", "None", 0], ["🧥", "Hoodie", 0], ["⚓", "Stripes", 5], ["🟥", "Flannel", 30], ["⚽", "Jersey", 15], ["🤵", "Tux", 50]]],
+    pants: ["Pants", [["🚫", "None", 0], ["👖", "Denim", 0], ["🟫", "Khaki", 5], ["🟩", "Plaid", 30], ["🏃", "Sport", 15], ["🎒", "Cargo", 45]]],
   };
   const DRESS_LINES = ["Do I look handsome? 😎", "Ooh, I love it! 💕", "Kitty has the best taste ✨", "Dressed up just for you 😳"];
   const STYLES = 5;
@@ -732,22 +767,30 @@
   const sameOutfit = (o) => Object.keys(outfit).every((k) => outfit[k] === Number(o[k]));
 
   $("wardrobe").innerHTML = Object.entries(WARDROBE).map(([part, [name, styles]]) =>
-    `<div class="row"><b>${name}</b><div class="opts">${styles.map(([icon, label], i) =>
-      `<button data-part="${part}" data-style="${i}"><i>${icon}</i>${label}</button>`).join("")}</div></div>`).join("");
+    `<div class="row"><b>${name}</b><div class="opts">${styles.map(([icon, label, need], i) =>
+      `<button data-part="${part}" data-style="${i}"><i>${icon}</i>${label}<small>🔒 ${need} 💗</small></button>`).join("")}</div></div>`).join("");
+  const needFor = (part, style) => WARDROBE[part][1][style][2];
+  const unlocked = (part, style) => total() >= needFor(part, style);
 
   function wear(o) {
     for (const k of Object.keys(outfit)) outfit[k] = Math.max(0, Math.min(STYLES, Number(o[k]) || 0));
     try { localStorage.setItem(OUTFIT_KEY, JSON.stringify(outfit)); } catch (e) {}
     for (const k of Object.keys(outfit))
-      document.querySelectorAll(`#clothes .${k}`).forEach((g, i) => g.classList.toggle("on", i + 1 === outfit[k]));
-    document.querySelectorAll("#wardrobe button").forEach((b) =>
-      b.classList.toggle("on", outfit[b.dataset.part] === Number(b.dataset.style)));
+      document.querySelectorAll(`#clothes .${k}`).forEach((g, i) =>
+        g.classList.toggle("on", i + 1 === outfit[k] && unlocked(k, i + 1))); // locked again if hearts were taken back
+    document.querySelectorAll("#wardrobe button").forEach((b) => {
+      const part = b.dataset.part, style = Number(b.dataset.style);
+      b.classList.toggle("locked", !unlocked(part, style));
+      b.classList.toggle("on", outfit[part] === style && unlocked(part, style));
+    });
   }
 
   $("wardrobe").addEventListener("click", async (e) => {
     const b = e.target.closest("button");
     if (!b) return;
     const style = Number(b.dataset.style);
+    if (!unlocked(b.dataset.part, style))
+      return react("waiting", `${WARDROBE[b.dataset.part][1][style][1]} unlocks at ${needFor(b.dataset.part, style)} hearts 🥺`, 2400);
     wear({ ...outfit, [b.dataset.part]: style });
     react(style ? "love" : "poke", style ? pick(DRESS_LINES) : "Hehe, a bit chilly 🙈", 2200);
     if (!db) return;
@@ -765,6 +808,67 @@
   async function loadOutfit() {
     const { data } = await db.from("outfit").select("hat, shirt, pants").eq("id", 1).maybeSingle();
     if (data) wear(data);
+  }
+
+  // ---------- love coupons: unlocked by hearts, redeemed by Kitty ----------
+  const COUPON_KEY = "lovemepls-coupons";
+  const COUPONS = [
+    [10, "🎬", "A movie of your choice + a matcha café date"],
+    [25, "🛍️", "Couple makeover — new looks for both of us, and you pick everything"],
+    [50, "🎨", "A workshop together + dinner at your favorite restaurant"],
+    [75, "🚗", "A trip to another province — anywhere you want"],
+  ];
+  let used = {}; // milestone -> when Kitty used it
+  try { used = JSON.parse(localStorage.getItem(COUPON_KEY)) || {}; } catch (e) {}
+  const saveUsed = () => { try { localStorage.setItem(COUPON_KEY, JSON.stringify(used)); } catch (e) {} };
+  const day = (t) => new Date(t).toLocaleDateString("en-US", { dateStyle: "medium" });
+
+  function renderCoupons() {
+    const t = total();
+    $("coupons").innerHTML = COUPONS.map(([m, icon, reward]) => {
+      const state = used[m] ? "used" : t >= m ? "ready" : "locked";
+      const foot = state === "used" ? `✅ Used on ${day(used[m])} — date incoming!`
+        : state === "ready" ? "Unlocked! Tap Use when you're ready 💕"
+        : `🔒 ${fmt(m - t)} more ${m - t > 1 ? "hearts" : "heart"} to unlock`;
+      return `<div class="coupon ${state}"><div class="c-icon">${icon}</div>
+        <div class="c-body"><b>${m} 💗</b><p>${reward}</p><small>${foot}</small></div>
+        ${state === "ready" ? `<button class="main" data-coupon="${m}">Use</button>` : ""}</div>`;
+    }).join("");
+  }
+
+  $("coupons").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-coupon]");
+    if (!b) return;
+    const m = Number(b.dataset.coupon);
+    const [, icon, reward] = COUPONS.find((c) => c[0] === m);
+    const go = await ask({ emoji: icon, title: "Use this coupon?", text: reward, no: "Not yet", yes: "Use it now 🎉", yesMain: true });
+    if (!go) return;
+    if (db) {
+      const { data, error } = await db.from("coupons").insert({ milestone: m }).select().single();
+      if (error && error.code !== "23505") return offline(); // 23505: already used on another device
+      used[m] = data ? data.used_at : used[m] || new Date().toISOString();
+    } else used[m] = new Date().toISOString();
+    saveUsed();
+    renderCoupons();
+    floatHearts(4);
+    react("love", "Yay! It's a date! 🥰 I'll make it happen", 3500);
+  });
+
+  async function loadCoupons() {
+    const { data, error } = await db.from("coupons").select("milestone, used_at");
+    if (error) return;
+    used = Object.fromEntries(data.map((r) => [r.milestone, r.used_at]));
+    saveUsed();
+    renderCoupons();
+  }
+
+  // tells Kitty what she just unlocked by going from `before` to `after` hearts
+  function announceUnlocks(before, after) {
+    const lines = [];
+    for (const [m, icon, reward] of COUPONS) if (before < m && after >= m) lines.push(`🎁 Coupon: ${icon} ${reward}`);
+    for (const [part, [, styles]] of Object.entries(WARDROBE))
+      styles.forEach(([icon, name, need]) => { if (need && before < need && after >= need) lines.push(`👕 New outfit: ${icon} ${name}`); });
+    if (lines.length) setTimeout(() => popup("🎉", "You unlocked something!", lines.join("\n")), 1200);
   }
 
   // ---------- storage: Supabase when configured, this browser otherwise ----------
@@ -819,6 +923,7 @@
     setStatus("☁️ Synced");
     render();
     loadOutfit();
+    loadCoupons();
   }
 
   // live updates: hearts given or taken back on another device show up here straight away
@@ -828,6 +933,7 @@
         if (eventType === "INSERT") {
           if (gifts.some((g) => g.id === row.id)) return;
           const g = fromRow(row);
+          const before = total();
           gifts.push(g);
           save();
           if (!writing) {
@@ -835,6 +941,7 @@
             else react("cry", "Waaah... my heart 💔😭", 3500);
           }
           render();
+          if (!writing && g.n > 0) announceUnlocks(before, total());
           if (!writing && g.n > 0 && total() >= GOAL) setTimeout(() => $("win").classList.add("show"), 600);
         } else if (eventType === "DELETE") {
           gifts = gifts.filter((g) => g.id !== old.id);
@@ -850,6 +957,15 @@
         if (!row || row.id !== 1 || sameOutfit(row)) return; // our own change echoing back
         wear(row);
         react("love", "Kitty picked a new outfit for me! 🥰", 2600);
+      })
+      .subscribe();
+    db.channel("coupons")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "coupons" }, ({ new: row }) => {
+        if (used[row.milestone]) return; // we used it here
+        used[row.milestone] = row.used_at;
+        saveUsed();
+        renderCoupons();
+        react("love", "Kitty used a coupon! It's a date 🥰", 3500);
       })
       .subscribe();
     // phones pause background tabs; catch up when the page comes back
@@ -882,6 +998,7 @@
     cheer();
     render();
     floatHearts(n);
+    announceUnlocks(before, total());
     if (total() >= GOAL) setTimeout(() => $("win").classList.add("show"), 600);
   }
 
