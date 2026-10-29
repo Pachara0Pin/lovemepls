@@ -70,7 +70,18 @@
   .tools button { background: none; color: var(--muted); padding: 6px; font-weight: 400; font-size: .9rem; }
   .log { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; font-size: .9rem; }
   .log li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--pink-soft); }
-  .log li span { color: var(--muted); }
+  .log li span { color: var(--muted); flex-shrink: 0; }
+  .log li { gap: 10px; }
+  .log q { display: block; color: var(--text); font-style: italic; font-size: .85rem; margin-top: 2px; overflow-wrap: anywhere; }
+  .grid svg.given { cursor: pointer; }
+  .letter textarea {
+    width: 100%; font: inherit; resize: none; margin-top: 4px;
+    border: 2px solid var(--pink-soft); border-radius: 16px; padding: 12px; color: var(--text);
+  }
+  .letter textarea:focus { outline: none; border-color: var(--pink); }
+  .letter .note { background: var(--pink-soft); border-radius: 16px; padding: 14px; font-size: 1.05rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .letter .note.none { background: none; color: var(--muted); font-style: italic; }
+  .letter .when { color: var(--muted); font-size: .8rem; }
   .log .empty { color: var(--muted); justify-content: center; border: none; }
   h2 { font-size: 1rem; margin: 0 0 8px; }
 
@@ -510,6 +521,30 @@
   </div>
 </div>
 
+<div class="win letter" id="noteBox">
+  <div class="card">
+    <div class="big">💌</div>
+    <h2 id="noteTitle"></h2>
+    <p>Why are you giving me this one? 🥰</p>
+    <textarea id="noteText" rows="3" maxlength="300" placeholder="Because..."></textarea>
+    <div class="ask-btns">
+      <button class="main" id="noteSend">Send 💗</button>
+      <button class="quiet" id="noteSkip">Send without a message</button>
+      <button class="quiet" id="noteCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="win letter" id="seeBox">
+  <div class="card">
+    <div class="big">💗</div>
+    <h2 id="seeTitle"></h2>
+    <p class="note" id="seeNote"></p>
+    <p class="when" id="seeWhen"></p>
+    <button class="main" id="seeClose">Close</button>
+  </div>
+</div>
+
 <div class="win" id="ask">
   <div class="card">
     <div class="big" id="askEmoji"></div>
@@ -548,7 +583,7 @@
 
   function heartSvg(fill, i) {
     // fill: 0 = empty, 0.5 = half, 1 = full
-    return `<svg viewBox="0 0 24 24"><defs><clipPath id="c${i}"><rect width="${24 * fill}" height="24"/></clipPath></defs>
+    return `<svg viewBox="0 0 24 24" data-i="${i}"${fill ? ` class="given"` : ""}><defs><clipPath id="c${i}"><rect width="${24 * fill}" height="24"/></clipPath></defs>
       <path d="${HEART}" fill="var(--empty)"/>
       ${fill ? `<path d="${HEART}" fill="var(--pink)" clip-path="url(#c${i})"/>` : ""}</svg>`;
   }
@@ -565,7 +600,7 @@
 
     $("log").innerHTML = gifts.length
       ? gifts.slice().reverse().map((g) =>
-          `<li>${g.n > 0 ? "💗 Gave" : "💔 Took back"} ${fmt(Math.abs(g.n))} ${Math.abs(g.n) > 1 ? "hearts" : "heart"} <span>${new Date(g.at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })}</span></li>`).join("")
+          `<li><div>${g.n > 0 ? "💗 Gave" : "💔 Took back"} ${fmt(Math.abs(g.n))} ${Math.abs(g.n) > 1 ? "hearts" : "heart"}${g.note ? `<q>${esc(g.note)}</q>` : ""}</div><span>${new Date(g.at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })}</span></li>`).join("")
       : `<li class="empty">None yet... still waiting</li>`;
 
     const full = t >= GOAL;
@@ -610,6 +645,45 @@
     setMood();
   }
   const cheer = () => react("happy", pick(HAPPY_LINES), 2800);
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const hearts = (n) => `${fmt(n)} ${n > 1 ? "hearts" : "heart"}`;
+
+  // asks Kitty why she's giving these hearts; resolves to the message ("" to skip) or null when cancelled
+  function writeNote(n) {
+    $("noteTitle").textContent = `Giving ${hearts(n)} 💗`;
+    $("noteText").value = "";
+    $("noteBox").classList.add("show");
+    react("love", "Ooh, is that for me? 😳");
+    setTimeout(() => $("noteText").focus(), 50);
+    return new Promise((resolve) => {
+      const done = (answer) => { $("noteBox").classList.remove("show"); resolve(answer); };
+      $("noteSend").onclick = () => done($("noteText").value.trim());
+      $("noteSkip").onclick = () => done("");
+      $("noteCancel").onclick = () => done(null);
+    });
+  }
+
+  // which gift filled each half heart; take-backs remove the newest halves first
+  function heartOwners() {
+    const halves = [];
+    for (const g of gifts) {
+      const k = Math.round(Math.abs(g.n) * 2);
+      if (g.n > 0) for (let i = 0; i < k && halves.length < GOAL * 2; i++) halves.push(g);
+      else halves.splice(Math.max(0, halves.length - k));
+    }
+    return halves;
+  }
+
+  function showHeart(i) {
+    const g = heartOwners()[i * 2];
+    if (!g) return;
+    $("seeTitle").textContent = `Heart #${i + 1}`;
+    $("seeNote").textContent = g.note || "No message with this one 🤫";
+    $("seeNote").className = g.note ? "note" : "note none";
+    $("seeWhen").textContent = `Kitty gave ${hearts(g.n)} on ${new Date(g.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`;
+    $("seeBox").classList.add("show");
+  }
 
   function ask({ emoji, title, text, no, yes }) {
     $("askEmoji").textContent = emoji;
@@ -694,15 +768,15 @@
   }
 
   // ---------- storage: Supabase when configured, this browser otherwise ----------
-  const fromRow = (r) => ({ id: r.id, n: Number(r.n), at: Date.parse(r.at) });
+  const fromRow = (r) => ({ id: r.id, n: Number(r.n), at: Date.parse(r.at), note: r.note || "" });
   const setStatus = (text) => { $("sync").textContent = text; };
   const offline = () => setStatus("⚠️ Can't reach the server — check your connection and try again");
 
-  async function addGift(n) {
-    if (!db) { gifts.push({ n, at: Date.now() }); save(); return true; }
+  async function addGift(n, note = "") {
+    if (!db) { gifts.push({ n, at: Date.now(), note }); save(); return true; }
     writing++;
     try {
-      const { data, error } = await db.from("hearts").insert({ n }).select().single();
+      const { data, error } = await db.from("hearts").insert({ n, note: note || null }).select().single();
       if (error) throw error;
       if (!gifts.some((g) => g.id === data.id)) gifts.push(fromRow(data)); // realtime may have added it already
       save();
@@ -738,7 +812,7 @@
 
   async function loadShared() {
     setStatus("☁️ Syncing…");
-    const { data, error } = await db.from("hearts").select("id, n, at").order("id");
+    const { data, error } = await db.from("hearts").select("id, n, at, note").order("id");
     if (error) return setStatus("⚠️ Offline — showing the last hearts this device saw");
     gifts = data.map(fromRow);
     save();
@@ -802,7 +876,9 @@
     const before = total();
     if (before >= GOAL) return;
     n = Math.min(n, GOAL - before);
-    if (!(await addGift(n))) return;
+    const note = await writeNote(n);
+    if (note === null) return release(); // cancelled
+    if (!(await addGift(n, note))) return release();
     cheer();
     render();
     floatHearts(n);
@@ -814,6 +890,8 @@
   $("addCustom").addEventListener("click", () => { give(parseFloat($("amount").value)); $("amount").value = ""; });
   $("amount").addEventListener("keydown", (e) => { if (e.key === "Enter") $("addCustom").click(); });
   $("take").addEventListener("click", takeOne);
+  $("grid").addEventListener("click", (e) => { const h = e.target.closest("svg[data-i]"); if (h) showHeart(Number(h.dataset.i)); });
+  $("seeClose").addEventListener("click", () => $("seeBox").classList.remove("show"));
   $("undo").addEventListener("click", () => { const last = gifts[gifts.length - 1]; removeGifts((g) => g === last); });
   $("reset").addEventListener("click", () => {
     if (confirm("Really clear all the hearts and start over? 🥲")) removeGifts();
