@@ -104,6 +104,18 @@
   }
   .avatar img, .avatar svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .avatar img { mix-blend-mode: multiply; } /* blends the image's white background into the card */
+  .avatar img.front { mix-blend-mode: normal; } /* the paws, cut out so clothes sit behind them */
+
+  .clothes .hat, .clothes .shirt, .clothes .pants { display: none; }
+  .clothes.hat-1 .h1, .clothes.hat-2 .h2, .clothes.hat-3 .h3,
+  .clothes.shirt-1 .s1, .clothes.shirt-2 .s2, .clothes.shirt-3 .s3,
+  .clothes.pants-1 .p1, .clothes.pants-2 .p2, .clothes.pants-3 .p3 { display: inline; }
+  .wardrobe .row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .wardrobe .row > b { width: 54px; font-size: .9rem; }
+  .wardrobe .opts { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .wardrobe .opts button { padding: 8px 2px; font-size: .8rem; font-weight: 400; background: var(--empty); line-height: 1.2; }
+  .wardrobe .opts button.on { background: var(--pink); color: #fff; font-weight: 600; }
+  .wardrobe .opts button i { display: block; font-style: normal; font-size: 1.3rem; }
   .dots span { display: inline-block; animation: dot 1.4s infinite; }
   .dots span:nth-child(2) { animation-delay: .2s; }
   .dots span:nth-child(3) { animation-delay: .4s; }
@@ -210,6 +222,107 @@
     <div class="avatar-wrap" id="avatarWrap">
       <div class="avatar">
         <img src="bear.webp" alt="Bear buddy with glasses" draggable="false">
+        <svg class="clothes" id="clothes" viewBox="0 0 1254 1254" aria-hidden="true">
+          <defs>
+            <radialGradient id="shade" cx="45%" cy="35%" r="75%">
+              <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#000" stop-opacity=".28"/>
+            </radialGradient>
+            <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity=".35"/>
+              <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="shirtClip"><path d="M498 838Q690 878 888 796L915 860C928 950 918 1020 893 1052Q720 1090 560 1048C530 990 510 930 498 838Z"/></clipPath>
+            <clipPath id="pantsClip"><path d="M545 990L905 996C912 1070 904 1124 890 1166L700 1170Q692 1134 684 1114Q640 1140 570 1128C552 1086 545 1040 545 990Z"/></clipPath>
+            <pattern id="stripes" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)">
+              <rect width="60" height="60" fill="#fffaf2"/><rect y="0" width="60" height="26" fill="#6fa8dc"/>
+            </pattern>
+            <pattern id="plaid" width="70" height="70" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)">
+              <rect width="70" height="70" fill="#e9a23b"/>
+              <rect width="70" height="22" fill="#c4572e" opacity=".55"/><rect width="22" height="70" fill="#c4572e" opacity=".55"/>
+              <rect x="44" width="5" height="70" fill="#fff4d6" opacity=".7"/><rect y="44" width="70" height="5" fill="#fff4d6" opacity=".7"/>
+            </pattern>
+          </defs>
+
+          <!-- pants (under the shirt hem) -->
+          <g class="pants p1" clip-path="url(#pantsClip)">
+            <rect x="500" y="970" width="450" height="220" fill="#5b8fd1"/>
+            <path d="M560 1030Q720 1052 900 1036M705 1050L700 1168M590 1108Q640 1100 678 1086M712 1146L884 1144" stroke="#f6c66b" stroke-width="5" stroke-dasharray="14 10" fill="none"/>
+            <circle cx="728" cy="1046" r="11" fill="#f6c66b"/>
+            <rect x="500" y="970" width="450" height="220" fill="url(#shade)"/>
+          </g>
+          <g class="pants p2" clip-path="url(#pantsClip)">
+            <rect x="500" y="970" width="450" height="220" fill="url(#plaid)"/>
+            <path d="M705 1050L700 1168" stroke="#8a3a1c" stroke-width="5" opacity=".5"/>
+            <rect x="500" y="970" width="450" height="220" fill="url(#shade)"/>
+          </g>
+          <g class="pants p3" transform="translate(726 1060) scale(1.12 1.25) translate(-726 -1032)">
+            <path d="M520 1010Q720 1050 925 1012L960 1100Q930 1130 900 1108Q870 1140 830 1112Q795 1145 760 1116Q725 1148 690 1118Q655 1146 622 1114Q585 1140 556 1106Q520 1124 492 1094Z" fill="#ffb3c9"/>
+            <path d="M530 1030Q720 1068 915 1032L940 1080Q905 1104 875 1082Q845 1110 812 1084Q780 1112 748 1088Q716 1114 684 1088Q652 1112 620 1086Q588 1108 560 1080Q534 1094 512 1072Z" fill="#ffd1de"/>
+            <path d="M520 1010Q720 1050 925 1012L920 1030Q720 1068 526 1030Z" fill="#ff7fa3"/>
+            <circle cx="600" cy="1060" r="5" fill="#fff"/><circle cx="760" cy="1072" r="5" fill="#fff"/><circle cx="870" cy="1056" r="5" fill="#fff"/>
+          </g>
+
+          <!-- shirts -->
+          <g class="shirt s1">
+            <g clip-path="url(#shirtClip)">
+              <rect x="480" y="780" width="460" height="320" fill="#e8475f"/>
+              <path d="M480 1030Q720 1078 940 1030V1100H480Z" fill="#c9344c"/>
+              <path d="M711 922c-18-30-70-24-70 16 0 34 70 70 70 70s70-36 70-70c0-40-52-46-70-16z" fill="#fff5f8"/>
+              <rect x="480" y="780" width="460" height="320" fill="url(#shade)"/>
+            </g>
+            <path d="M498 838Q690 878 888 796" stroke="#c9344c" stroke-width="22" fill="none" stroke-linecap="round"/>
+          </g>
+          <g class="shirt s2">
+            <g clip-path="url(#shirtClip)">
+              <rect x="480" y="780" width="460" height="320" fill="url(#stripes)"/>
+              <rect x="480" y="780" width="460" height="320" fill="url(#shade)"/>
+            </g>
+            <path d="M498 838Q690 878 888 796" stroke="#fffaf2" stroke-width="18" fill="none" stroke-linecap="round"/>
+            <path d="M498 838Q690 878 888 796" stroke="#6fa8dc" stroke-width="6" fill="none" stroke-linecap="round" transform="translate(0 10)"/>
+          </g>
+          <g class="shirt s3">
+            <g clip-path="url(#shirtClip)">
+              <rect x="480" y="780" width="460" height="320" fill="#2f2a3a"/>
+              <path d="M640 860L705 1070L780 852Z" fill="#fffaf2"/>
+              <path d="M640 860L700 990L612 880ZM780 852L712 990L812 866Z" fill="#3f3850"/>
+              <circle cx="706" cy="960" r="7" fill="#2f2a3a"/><circle cx="707" cy="1010" r="7" fill="#2f2a3a"/>
+              <rect x="480" y="780" width="460" height="320" fill="url(#shade)"/>
+            </g>
+            <g transform="translate(708 872) rotate(-10)">
+              <path d="M0 0L-58-28Q-66 0-58 28ZM0 0L58-28Q66 0 58 28Z" fill="#e8475f"/>
+              <rect x="-14" y="-15" width="28" height="30" rx="9" fill="#c9344c"/>
+            </g>
+          </g>
+
+          <!-- hats -->
+          <g transform="translate(610 238) rotate(-9)">
+            <g class="hat h1">
+              <path d="M-205 10C-210-190 210-190 205 10Z" fill="#ff8fb1"/>
+              <path d="M-120-120V0M-60-150V0M0-160V0M60-150V0M120-120V0" stroke="#ff6f99" stroke-width="10" stroke-linecap="round"/>
+              <path d="M-205 10C-210-190 210-190 205 10Z" fill="url(#shade)"/>
+              <rect x="-222" y="-20" width="444" height="70" rx="34" fill="#ffd1de"/>
+              <path d="M-180-6V36M-130-6V36M-80-6V36M-30-6V36M20-6V36M70-6V36M120-6V36M170-6V36" stroke="#ffb3c9" stroke-width="9" stroke-linecap="round"/>
+              <circle cx="0" cy="-166" r="48" fill="#fff5f8"/><circle cx="-14" cy="-180" r="18" fill="#fff" opacity=".8"/>
+            </g>
+            <g class="hat h2">
+              <path d="M-150 20L-170-120L-85-50L0-160L85-50L170-120L150 20Z" fill="#f6c34a" stroke="#d99a1e" stroke-width="10" stroke-linejoin="round"/>
+              <path d="M-150 20L-170-120L-85-50L0-160L85-50L170-120L150 20Z" fill="url(#gloss)"/>
+              <rect x="-160" y="-8" width="320" height="34" rx="12" fill="#e9a92a"/>
+              <circle cx="-170" cy="-128" r="16" fill="#ff8fb1"/><circle cx="0" cy="-168" r="18" fill="#7fc8f8"/><circle cx="170" cy="-128" r="16" fill="#ff8fb1"/>
+              <circle cx="-80" cy="9" r="11" fill="#e8475f"/><circle cx="0" cy="9" r="13" fill="#7fc8f8"/><circle cx="80" cy="9" r="11" fill="#e8475f"/>
+            </g>
+            <g class="hat h3">
+              <path d="M-200 20C-205-180 205-180 200 20Z" fill="#6fa8dc"/>
+              <path d="M0-150V20M-200 20C-150-40-60-60-40 20M200 20C150-40 60-60 40 20" stroke="#4f86bd" stroke-width="7" fill="none"/>
+              <path d="M-200 20C-205-180 205-180 200 20Z" fill="url(#shade)"/>
+              <path d="M-200 14Q-40 -6 200 14Q210 70 60 76Q-130 80-200 14Z" fill="#3f6fa3"/>
+              <circle cx="0" cy="-150" r="14" fill="#4f86bd"/>
+              <path d="M-40-80c-10-17-38-13-38 9 0 19 38 39 38 39s38-20 38-39c0-22-28-26-38-9z" fill="#fff5f8"/>
+            </g>
+          </g>
+        </svg>
+        <img class="front" src="bear-hands.webp" alt="" draggable="false">
         <svg class="face" viewBox="0 0 1254 1254" aria-hidden="true">
           <defs>
             <radialGradient id="irisGrad" cx="40%" cy="35%" r="70%">
@@ -293,6 +406,11 @@
         </svg>
       </div>
     </div>
+  </section>
+
+  <section class="card wardrobe">
+    <h2>Dress me up, Kitty 👗</h2>
+    <div id="wardrobe"></div>
   </section>
 
   <section class="card">
@@ -472,6 +590,46 @@
     render();
   }
 
+  // ---------- wardrobe: Kitty picks the bear's hat, shirt and pants ----------
+  const OUTFIT_KEY = "lovemepls-outfit";
+  const WARDROBE = {
+    hat: ["Hat", [["🚫", "None"], ["🧶", "Beanie"], ["👑", "Crown"], ["🧢", "Cap"]]],
+    shirt: ["Shirt", [["🚫", "None"], ["❤️", "Sweater"], ["🌊", "Stripes"], ["🤵", "Tux"]]],
+    pants: ["Pants", [["🚫", "None"], ["👖", "Denim"], ["🟧", "Plaid"], ["🩰", "Tutu"]]],
+  };
+  const DRESS_LINES = ["Do I look cute? 🥰", "Ooh, I love it! 💕", "Kitty has the best taste ✨", "Dressed up just for you 😳"];
+  let outfit = { hat: 0, shirt: 0, pants: 0 };
+  try { Object.assign(outfit, JSON.parse(localStorage.getItem(OUTFIT_KEY))); } catch (e) {}
+  const sameOutfit = (o) => Object.keys(outfit).every((k) => outfit[k] === Number(o[k]));
+
+  $("wardrobe").innerHTML = Object.entries(WARDROBE).map(([part, [name, styles]]) =>
+    `<div class="row"><b>${name}</b><div class="opts">${styles.map(([icon, label], i) =>
+      `<button data-part="${part}" data-style="${i}"><i>${icon}</i>${label}</button>`).join("")}</div></div>`).join("");
+
+  function wear(o) {
+    for (const k of Object.keys(outfit)) outfit[k] = Math.max(0, Math.min(3, Number(o[k]) || 0));
+    try { localStorage.setItem(OUTFIT_KEY, JSON.stringify(outfit)); } catch (e) {}
+    $("clothes").setAttribute("class", `clothes hat-${outfit.hat} shirt-${outfit.shirt} pants-${outfit.pants}`);
+    document.querySelectorAll("#wardrobe button").forEach((b) =>
+      b.classList.toggle("on", outfit[b.dataset.part] === Number(b.dataset.style)));
+  }
+
+  $("wardrobe").addEventListener("click", async (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const style = Number(b.dataset.style);
+    wear({ ...outfit, [b.dataset.part]: style });
+    react(style ? "love" : "poke", style ? pick(DRESS_LINES) : "Hehe, a bit chilly 🙈", 2200);
+    if (!db) return;
+    const { error } = await db.from("outfit").upsert({ id: 1, ...outfit, at: new Date().toISOString() });
+    if (error) setStatus("⚠️ Outfit saved on this device only");
+  });
+
+  async function loadOutfit() {
+    const { data } = await db.from("outfit").select("hat, shirt, pants").eq("id", 1).maybeSingle();
+    if (data) wear(data);
+  }
+
   // ---------- storage: Supabase when configured, this browser otherwise ----------
   const fromRow = (r) => ({ id: r.id, n: Number(r.n), at: Date.parse(r.at) });
   const setStatus = (text) => { $("sync").textContent = text; };
@@ -523,6 +681,7 @@
     save();
     setStatus("☁️ Synced");
     render();
+    loadOutfit();
   }
 
   // live updates: hearts given or taken back on another device show up here straight away
@@ -548,6 +707,14 @@
       })
       // load after subscribing so nothing given in between is missed
       .subscribe((state) => { if (state === "SUBSCRIBED") loadShared(); });
+    // own channel, so a missing outfit table can never break the hearts
+    db.channel("outfit")
+      .on("postgres_changes", { event: "*", schema: "public", table: "outfit" }, ({ new: row }) => {
+        if (!row || row.id !== 1 || sameOutfit(row)) return; // our own change echoing back
+        wear(row);
+        react("love", "Kitty picked a new outfit for me! 🥰", 2600);
+      })
+      .subscribe();
     // phones pause background tabs; catch up when the page comes back
     document.addEventListener("visibilitychange", () => { if (!document.hidden) loadShared(); });
   }
@@ -596,6 +763,7 @@
   // switch back to "waiting" when a new day starts
   setInterval(() => { if (!moodHeld) setMood(); }, 60000);
 
+  wear(outfit);
   render();
   if (db) listen();
   else if (SUPABASE_URL) setStatus("⚠️ Couldn't load the sync library — hearts are only saved on this device");
