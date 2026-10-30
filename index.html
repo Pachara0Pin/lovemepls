@@ -108,6 +108,40 @@
   .letter .note.none { background: none; color: var(--muted); font-style: italic; }
   .letter .when { color: var(--muted); font-size: .8rem; }
   .log .empty { color: var(--muted); justify-content: center; border: none; }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .cal-head h2 { margin: 0; }
+  .cal-head button { background: none; padding: 4px 12px; font-size: 1.3rem; color: var(--pink); }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal .dow { text-align: center; font-size: .7rem; color: var(--muted); }
+  .cal .d {
+    aspect-ratio: 1; padding: 0; border-radius: 12px; font-size: .85rem; position: relative;
+    background: #fffafc center / cover no-repeat;
+  }
+  .cal .d.today { box-shadow: inset 0 0 0 2px var(--pink); }
+  .cal .d.has { background-color: var(--pink-soft); }
+  .cal .d.photo { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
+  .cal .d.has:not(.photo)::after {
+    content: ""; position: absolute; bottom: 5px; left: 50%; width: 6px; height: 6px;
+    margin-left: -3px; border-radius: 50%; background: var(--pink);
+  }
+  .cal-tip { text-align: center; color: var(--muted); font-size: .75rem; margin: 8px 0 0; }
+  #dayBox .card { max-height: calc(100vh - 32px); overflow-y: auto; width: 100%; }
+  .day-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 12px; }
+  .day-photos.one { grid-template-columns: 1fr; }
+  .slot {
+    position: relative; aspect-ratio: 1; border-radius: 16px; overflow: hidden; padding: 0;
+    background: var(--pink-soft); display: flex; align-items: center; justify-content: center;
+  }
+  .day-photos.one .slot { aspect-ratio: 4 / 3; }
+  .slot img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+  .slot.add { flex-direction: column; gap: 4px; font-size: 1.6rem; border: 2px dashed var(--pink); background: #fffafc; }
+  .slot.add span { font-size: .85rem; color: var(--muted); }
+  .slot .x {
+    position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; padding: 0;
+    border-radius: 50%; background: rgba(0, 0, 0, .55); color: #fff; font-size: .9rem;
+  }
+  #photoBox { background: rgba(20, 8, 14, .92); z-index: 20; cursor: zoom-out; }
+  #photoBox img { max-width: 100%; max-height: 100%; border-radius: 16px; }
   h2 { font-size: 1rem; margin: 0 0 8px; }
 
   .win {
@@ -539,6 +573,16 @@
     </div>
   </section>
 
+  <section class="card" id="days">
+    <div class="cal-head">
+      <button id="calPrev" aria-label="Previous month">‹</button>
+      <h2>📅 <span id="calTitle"></span></h2>
+      <button id="calNext" aria-label="Next month">›</button>
+    </div>
+    <div class="cal" id="cal"></div>
+    <p class="cal-tip">Tap a day to add where we went — up to 2 photos 📸</p>
+  </section>
+
   <section class="card">
     <h2>Heart history</h2>
     <ul class="log" id="log"></ul>
@@ -581,6 +625,21 @@
   </div>
 </div>
 
+<div class="win letter" id="dayBox">
+  <div class="card">
+    <h2 id="dayTitle"></h2>
+    <div class="day-photos" id="dayPhotos"></div>
+    <p class="note" id="dayNote"></p>
+    <textarea id="dayText" rows="3" maxlength="500" placeholder="Where did we go? What did we do? 💕"></textarea>
+    <input type="file" id="dayFile" accept="image/*" hidden>
+    <div class="ask-btns">
+      <button class="main" id="daySave">Save 💗</button>
+      <button class="quiet" id="dayEdit">✏️ Edit</button>
+      <button class="quiet" id="dayClose">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="win letter" id="seeBox">
   <div class="card">
     <div class="big" id="seeEmoji"></div>
@@ -602,6 +661,8 @@
     </div>
   </div>
 </div>
+
+<div class="win" id="photoBox"><img id="photoBig" alt=""></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -920,6 +981,163 @@
     if (lines.length) setTimeout(() => popup("🎉", "You unlocked something!", lines.join("\n")), 1200);
   }
 
+  // ---------- our days: a calendar of where we went, up to 2 photos a day ----------
+  const MEM_KEY = "lovemepls-memories";
+  const MAX_PHOTOS = 2;
+  let memories = {}; // "YYYY-MM-DD" -> { note, photos: [storage paths] }
+  try { memories = JSON.parse(localStorage.getItem(MEM_KEY)) || {}; } catch (e) {}
+  const saveMemories = () => { try { localStorage.setItem(MEM_KEY, JSON.stringify(memories)); } catch (e) {} };
+  const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const photoUrl = (path) => db.storage.from("memories").getPublicUrl(path).data.publicUrl;
+  const thumbOf = (path) => path.replace(/\.jpg$/, "-t.jpg"); // small copy for the calendar cells
+  let calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  let openKey = null;
+  let draft = null; // { note, photos: [{ path } | { full, thumb, url }] } while editing
+  let savingMemory = 0;
+
+  function renderCalendar() {
+    const y = calMonth.getFullYear(), m = calMonth.getMonth();
+    $("calTitle").textContent = calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const today = dayKey(new Date());
+    const cells = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => `<div class="dow">${d}</div>`);
+    for (let i = 0; i < new Date(y, m, 1).getDay(); i++) cells.push("<div></div>");
+    for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
+      const key = dayKey(new Date(y, m, d));
+      const mem = memories[key];
+      const cls = ["d", key === today && "today", mem && "has", mem?.photos.length && "photo"].filter(Boolean).join(" ");
+      const bg = mem?.photos.length ? ` style="background-image:url('${esc(photoUrl(thumbOf(mem.photos[0])))}')"` : "";
+      cells.push(`<button class="${cls}" data-day="${key}"${bg}>${d}</button>`);
+    }
+    $("cal").innerHTML = cells.join("");
+  }
+
+  // shows a day; empty days open straight into editing
+  function openDay(key, edit = !memories[key]) {
+    openKey = key;
+    const mem = memories[key];
+    const [y, m, d] = key.split("-").map(Number);
+    $("dayTitle").textContent = new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    draft = edit ? { note: mem?.note || "", photos: (mem?.photos || []).map((path) => ({ path })) } : null;
+    drawDay();
+    $("dayBox").classList.add("show");
+  }
+
+  function drawDay() {
+    const mem = memories[openKey];
+    const shots = draft ? draft.photos : (mem?.photos || []).map((path) => ({ path }));
+    const slots = shots.map((p, i) => `<div class="slot"><img src="${esc(p.url || photoUrl(p.path))}" data-big alt="">${draft ? `<button class="x" data-drop="${i}" aria-label="Remove photo">✕</button>` : ""}</div>`);
+    if (draft && shots.length < MAX_PHOTOS) slots.push(`<button class="slot add" id="dayAdd">📷<span>Add photo</span></button>`);
+    $("dayPhotos").innerHTML = slots.join("");
+    $("dayPhotos").className = "day-photos" + (slots.length === 1 ? " one" : "");
+    $("dayPhotos").hidden = !slots.length;
+    $("dayNote").textContent = mem?.note || "No words for this day yet 🤫";
+    $("dayNote").className = mem?.note ? "note" : "note none";
+    $("dayNote").hidden = !!draft;
+    $("dayText").hidden = !draft;
+    if (draft) $("dayText").value = draft.note;
+    $("daySave").hidden = !draft;
+    $("dayEdit").hidden = !!draft;
+    $("dayClose").textContent = draft ? "Cancel" : "Close";
+  }
+
+  // resizes a decoded photo so uploads stay light: longest side `max` px, as JPEG
+  function shrink(img, max, quality) {
+    const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * k);
+    c.height = Math.round(img.naturalHeight * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error("encode failed"))), "image/jpeg", quality));
+  }
+
+  async function saveDay() {
+    if (!draft) return;
+    const key = openKey;
+    const note = $("dayText").value.trim();
+    const old = memories[key]?.photos || [];
+    const bucket = db.storage.from("memories");
+    $("daySave").disabled = true;
+    $("daySave").textContent = "Saving…";
+    savingMemory++;
+    try {
+      const photos = [];
+      for (const p of draft.photos) {
+        if (p.path) { photos.push(p.path); continue; }
+        const path = `${key}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+        for (const [name, blob] of [[path, p.full], [thumbOf(path), p.thumb]]) {
+          const { error } = await bucket.upload(name, blob, { contentType: "image/jpeg" });
+          if (error) throw error;
+        }
+        photos.push(path);
+      }
+      if (photos.length || note) {
+        const { error } = await db.from("memories").upsert({ day: key, note: note || null, photos, updated_at: new Date().toISOString() });
+        if (error) throw error;
+        memories[key] = { note, photos };
+      } else {
+        const { error } = await db.from("memories").delete().eq("day", key);
+        if (error) throw error;
+        delete memories[key];
+      }
+      const gone = old.filter((p) => !photos.includes(p));
+      if (gone.length) bucket.remove(gone.flatMap((p) => [p, thumbOf(p)])); // best effort
+      saveMemories();
+      renderCalendar();
+      draft = null;
+      if (memories[key]) drawDay();
+      else $("dayBox").classList.remove("show");
+      react("love", "What a lovely day 🥰", 2600);
+    } catch (e) {
+      popup("😵", "Couldn't save this day", "Check your connection and try again.");
+    } finally {
+      savingMemory--;
+      $("daySave").disabled = false;
+      $("daySave").textContent = "Save 💗";
+    }
+  }
+
+  async function loadMemories() {
+    const { data, error } = await db.from("memories").select("day, note, photos");
+    if (error) return;
+    memories = Object.fromEntries(data.map((r) => [r.day, { note: r.note || "", photos: r.photos || [] }]));
+    saveMemories();
+    renderCalendar();
+    if (openKey && !draft && $("dayBox").classList.contains("show")) drawDay();
+  }
+
+  $("calPrev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); renderCalendar(); });
+  $("calNext").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1); renderCalendar(); });
+  $("cal").addEventListener("click", (e) => { const b = e.target.closest("[data-day]"); if (b) openDay(b.dataset.day); });
+  $("dayEdit").addEventListener("click", () => openDay(openKey, true));
+  $("dayClose").addEventListener("click", () => { draft = null; $("dayBox").classList.remove("show"); });
+  $("daySave").addEventListener("click", saveDay);
+  $("dayText").addEventListener("input", () => { if (draft) draft.note = $("dayText").value; });
+  $("dayPhotos").addEventListener("click", (e) => {
+    const drop = e.target.closest("[data-drop]");
+    if (drop) { draft.photos.splice(Number(drop.dataset.drop), 1); return drawDay(); }
+    if (e.target.closest("#dayAdd")) return $("dayFile").click();
+    const big = e.target.closest("[data-big]");
+    if (big) { $("photoBig").src = big.src; $("photoBox").classList.add("show"); }
+  });
+  $("photoBox").addEventListener("click", () => $("photoBox").classList.remove("show"));
+  $("dayFile").addEventListener("change", async () => {
+    const file = $("dayFile").files[0];
+    $("dayFile").value = "";
+    if (!file || !draft || draft.photos.length >= MAX_PHOTOS) return;
+    const src = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = src; });
+      const [full, thumb] = await Promise.all([shrink(img, 1280, 0.82), shrink(img, 240, 0.7)]);
+      draft.photos.push({ full, thumb, url: URL.createObjectURL(full) });
+      drawDay();
+    } catch (e) {
+      popup("😵", "Couldn't open that photo", "Try a different one?");
+    } finally {
+      URL.revokeObjectURL(src);
+    }
+  });
+
   // ---------- storage: Supabase when configured, this browser otherwise ----------
   const fromRow = (r) => ({ id: r.id, n: Number(r.n), at: Date.parse(r.at), note: r.note || "" });
   const setStatus = (text) => { $("sync").textContent = text; };
@@ -973,6 +1191,7 @@
     render();
     loadOutfit();
     loadCoupons();
+    loadMemories();
   }
 
   // live updates: hearts given or taken back on another device show up here straight away
@@ -1015,6 +1234,12 @@
         saveUsed();
         renderCoupons();
         react("love", "Kitty used a coupon! It's a date 🥰", 3500);
+      })
+      .subscribe();
+    db.channel("memories")
+      .on("postgres_changes", { event: "*", schema: "public", table: "memories" }, ({ eventType }) => {
+        loadMemories();
+        if (!savingMemory && eventType !== "DELETE") react("love", "A new memory just landed 📸🥰", 3000);
       })
       .subscribe();
     // phones pause background tabs; catch up when the page comes back
@@ -1072,7 +1297,8 @@
 
   wear(outfit);
   render();
-  if (db) listen();
+  $("days").hidden = !db; // photos need the shared server
+  if (db) { renderCalendar(); listen(); }
   else if (SUPABASE_URL) setStatus("⚠️ Couldn't load the sync library — hearts are only saved on this device");
 </script></body>
 </html>
