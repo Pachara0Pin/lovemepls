@@ -711,8 +711,11 @@
 
   function showHeart(i) {
     const halves = heartOwners();
-    const parts = [...new Set([halves[i * 2], halves[i * 2 + 1]].filter(Boolean))];
-    if (!parts.length) return;
+    const mine = [halves[i * 2], halves[i * 2 + 1]].filter(Boolean);
+    if (!mine.length) return;
+    // a gift's message lives on the heart where it starts; a big gift's later hearts fall back to it
+    const starts = [...new Set(mine)].filter((g) => halves.indexOf(g) >= i * 2);
+    const parts = starts.length ? starts : [mine[0]];
     const when = (g) => new Date(g.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
     if (parts.length === 1) {
       const g = parts[0];
