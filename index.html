@@ -710,10 +710,20 @@
   }
 
   function showHeart(i) {
-    const g = heartOwners()[i * 2];
-    if (!g) return;
-    popup("💗", `Heart #${i + 1}`, g.note, `Kitty gave ${hearts(g.n)} on ${new Date(g.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}`);
-    if (!g.note) $("seeNote").textContent = "No message with this one 🤫";
+    const halves = heartOwners();
+    const parts = [...new Set([halves[i * 2], halves[i * 2 + 1]].filter(Boolean))];
+    if (!parts.length) return;
+    const when = (g) => new Date(g.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+    if (parts.length === 1) {
+      const g = parts[0];
+      popup("💗", `Heart #${i + 1}`, g.note, `Kitty gave ${hearts(g.n)} on ${when(g)}`);
+    } else {
+      // two half-hearts from different gifts make up this heart
+      const notes = parts.filter((g) => g.note);
+      const text = notes.length > 1 ? notes.map((g, k) => `${k ? "Second" : "First"} half 💗\n${g.note}`).join("\n\n") : notes[0]?.note || "";
+      popup("💗", `Heart #${i + 1}`, text, `Two halves · ${parts.map(when).join(" & ")}`);
+    }
+    if (!$("seeNote").textContent) $("seeNote").textContent = "No message with this one 🤫";
   }
 
   function popup(emoji, title, text, sub = "") {
