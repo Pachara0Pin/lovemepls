@@ -140,8 +140,10 @@
     position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; padding: 0;
     border-radius: 50%; background: rgba(0, 0, 0, .55); color: #fff; font-size: .9rem;
   }
-  #photoBox { background: rgba(20, 8, 14, .92); z-index: 20; cursor: zoom-out; }
-  #photoBox img { max-width: 100%; max-height: 100%; border-radius: 16px; }
+  #photoBox { background: rgba(20, 8, 14, .92); z-index: 20; cursor: zoom-out; flex-direction: column; gap: 14px; }
+  #photoBox img { max-width: 100%; max-height: calc(100% - 70px); border-radius: 16px; }
+  .photo-btns { display: flex; gap: 10px; }
+  .photo-btns button { padding: 12px 20px; }
   h2 { font-size: 1rem; margin: 0 0 8px; }
 
   .win {
@@ -662,7 +664,13 @@
   </div>
 </div>
 
-<div class="win" id="photoBox"><img id="photoBig" alt=""></div>
+<div class="win" id="photoBox">
+  <img id="photoBig" alt="">
+  <div class="photo-btns">
+    <button class="main" id="photoSave">⬇️ Save photo</button>
+    <button id="photoClose">Close</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -1025,7 +1033,7 @@
   function drawDay() {
     const mem = memories[openKey];
     const shots = draft ? draft.photos : (mem?.photos || []).map((path) => ({ path }));
-    const slots = shots.map((p, i) => `<div class="slot"><img src="${esc(p.url || photoUrl(p.path))}" data-big alt="">${draft ? `<button class="x" data-drop="${i}" aria-label="Remove photo">✕</button>` : ""}</div>`);
+    const slots = shots.map((p, i) => `<div class="slot"><img src="${esc(p.url || photoUrl(p.path))}" data-big="${i}" alt="">${draft ? `<button class="x" data-drop="${i}" aria-label="Remove photo">✕</button>` : ""}</div>`);
     if (draft && shots.length < MAX_PHOTOS) slots.push(`<button class="slot add" id="dayAdd">📷<span>Add photo</span></button>`);
     $("dayPhotos").innerHTML = slots.join("");
     $("dayPhotos").className = "day-photos" + (slots.length === 1 ? " one" : "");
@@ -1117,9 +1125,44 @@
     if (drop) { draft.photos.splice(Number(drop.dataset.drop), 1); return drawDay(); }
     if (e.target.closest("#dayAdd")) return $("dayFile").click();
     const big = e.target.closest("[data-big]");
-    if (big) { $("photoBig").src = big.src; $("photoBox").classList.add("show"); }
+    if (big) viewPhoto(big.src, Number(big.dataset.big));
   });
-  $("photoBox").addEventListener("click", () => $("photoBox").classList.remove("show"));
+
+  // full-screen photo with a save button; the file is fetched up front so iPhone's share sheet
+  // still counts the tap as the user's (it refuses once a slow download has run in between)
+  let bigFile = null;
+  async function viewPhoto(src, i) {
+    $("photoBig").src = src;
+    $("photoBox").classList.add("show");
+    bigFile = null;
+    $("photoSave").disabled = true;
+    $("photoSave").textContent = "Preparing…";
+    try {
+      const blob = await (await fetch(src)).blob();
+      if ($("photoBig").src !== src) return; // another photo opened meanwhile
+      bigFile = new File([blob], `our-day-${openKey}-${i + 1}.jpg`, { type: "image/jpeg" });
+      $("photoSave").disabled = false;
+      $("photoSave").textContent = "⬇️ Save photo";
+    } catch (e) {
+      $("photoSave").textContent = "Can't save right now";
+    }
+  }
+
+  $("photoSave").addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (!bigFile) return;
+    if (navigator.canShare?.({ files: [bigFile] })) {
+      // iPhone/Android: opens the share sheet, where "Save Image" puts it in Photos
+      try { await navigator.share({ files: [bigFile] }); } catch (err) {} // closing the sheet is fine
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(bigFile);
+    a.download = bigFile.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  $("photoBox").addEventListener("click", (e) => { if (!e.target.closest("#photoSave")) $("photoBox").classList.remove("show"); });
   $("dayFile").addEventListener("change", async () => {
     const file = $("dayFile").files[0];
     $("dayFile").value = "";
