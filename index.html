@@ -98,11 +98,12 @@
   .log li { gap: 10px; }
   .log q { display: block; color: var(--text); font-style: italic; font-size: .85rem; margin-top: 2px; overflow-wrap: anywhere; }
   .grid svg.given { cursor: pointer; }
-  .letter textarea {
+  .letter textarea, .letter input {
     width: 100%; font: inherit; resize: none; margin-top: 4px;
     border: 2px solid var(--pink-soft); border-radius: 16px; padding: 12px; color: var(--text);
   }
-  .letter textarea:focus { outline: none; border-color: var(--pink); }
+  .letter input { text-align: center; letter-spacing: .3em; }
+  .letter textarea:focus, .letter input:focus { outline: none; border-color: var(--pink); }
   .letter .note { background: var(--pink-soft); border-radius: 16px; padding: 14px; font-size: 1.05rem; overflow-wrap: anywhere; white-space: pre-wrap; }
   .letter .note.none { background: none; color: var(--muted); font-style: italic; }
   .letter .when { color: var(--muted); font-size: .8rem; }
@@ -567,6 +568,19 @@
   </div>
 </div>
 
+<div class="win letter" id="codeBox">
+  <div class="card">
+    <div class="big">🔒</div>
+    <h2>Start over?</h2>
+    <p>This clears every heart. Enter the passcode to continue.</p>
+    <input id="codeText" type="password" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="••••••••">
+    <div class="ask-btns">
+      <button class="quiet" id="codeOk">Clear all hearts</button>
+      <button class="main" id="codeCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="win letter" id="seeBox">
   <div class="card">
     <div class="big" id="seeEmoji"></div>
@@ -592,6 +606,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
   const GOAL = 100;
+  const RESET_CODE = "19930726";
   const KEY = "lovemepls-hearts";
   const HEART = "M12 21s-7.5-4.6-9.6-9.2C.9 8.6 2.8 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.8 0 5.7 4.1 4.2 7.3C19.5 16.4 12 21 12 21z";
 
@@ -695,6 +710,19 @@
       $("noteSend").onclick = () => done($("noteText").value.trim());
       $("noteSkip").onclick = () => done("");
       $("noteCancel").onclick = () => done(null);
+    });
+  }
+
+  // asks for the start-over passcode; resolves true only when it matches
+  function askCode() {
+    $("codeText").value = "";
+    $("codeBox").classList.add("show");
+    setTimeout(() => $("codeText").focus(), 50);
+    return new Promise((resolve) => {
+      const done = (ok) => { $("codeBox").classList.remove("show"); resolve(ok); };
+      $("codeOk").onclick = () => done($("codeText").value.trim() === RESET_CODE);
+      $("codeCancel").onclick = () => done(false);
+      $("codeText").onkeydown = (e) => { if (e.key === "Enter") $("codeOk").click(); };
     });
   }
 
@@ -1031,8 +1059,8 @@
   $("grid").addEventListener("click", (e) => { const h = e.target.closest("svg[data-i]"); if (h) showHeart(Number(h.dataset.i)); });
   $("seeClose").addEventListener("click", () => $("seeBox").classList.remove("show"));
   $("undo").addEventListener("click", () => { const last = gifts[gifts.length - 1]; removeGifts((g) => g === last); });
-  $("reset").addEventListener("click", () => {
-    if (confirm("Really clear all the hearts and start over? 🥲")) removeGifts();
+  $("reset").addEventListener("click", async () => {
+    if (await askCode()) removeGifts();
   });
   $("closeWin").addEventListener("click", () => $("win").classList.remove("show"));
   $("avatarWrap").addEventListener("click", () => {
