@@ -57,7 +57,7 @@
   .heart-btn { width: 72%; position: relative; }
   .heart-btn svg, .jar-btn svg { width: 100%; height: auto; display: block; overflow: visible; }
   .heart-btn .count {
-    position: absolute; inset: 0 0 12% 0; display: flex; align-items: center; justify-content: center;
+    position: absolute; inset: 0 0 16% 0; display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 1.7rem; font-weight: 700; text-shadow: 0 1px 4px rgba(0, 0, 0, .15); pointer-events: none;
   }
   .heart-btn.zero .count { color: var(--muted); text-shadow: none; font-size: 1.3rem; }
@@ -209,7 +209,7 @@
   const ME_KEY = "lovemepls-me";
   const SEEN_KEY = "lovemepls-jar-seen";
   const CACHE_KEY = "lovemepls-jars";
-  const HEART = "M12 21s-7.5-4.6-9.6-9.2C.9 8.6 2.8 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.8 0 5.7 4.1 4.2 7.3C19.5 16.4 12 21 12 21z";
+  const BIG_HEART = "M50 88C24 70 4 54 4 31C4 15 16 4 30 4C39 4 46 9 50 17C54 9 61 4 70 4C84 4 96 15 96 31C96 54 76 70 50 88Z";
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -248,8 +248,9 @@
   // ---------- drawing ----------
   function heartSvg(owner, n) {
     const c = `var(--${owner})`;
-    return `<svg viewBox="0 0 24 22"><path d="${HEART}" transform="translate(0 -2)" fill="${n ? c : "var(--empty)"}" stroke="${n ? c : "var(--soft)"}" stroke-width=".6"/>
-      ${n ? `<path d="M6.4 6.6c-1.6.2-2.6 1.7-2.4 3.3" transform="translate(0 -2)" stroke="#fff" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/>` : ""}</svg>`;
+    // a symmetric heart (mirrored around x = 50) with round lobes, a clear notch and a pointed tip
+    return `<svg viewBox="0 0 100 92"><path d="${BIG_HEART}" fill="${n ? c : "var(--empty)"}" stroke="${n ? c : "var(--soft)"}" stroke-width="3" stroke-linejoin="round"/>
+      ${n ? `<path d="M17 30C17 21 23 15 31 15" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".55"/>` : ""}</svg>`;
   }
 
   // stable little "random" numbers per note so slips don't jump around between renders
