@@ -5,376 +5,508 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ไปญี่ปุ่นกันมั้ย 🧡</title>
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="theme-color" content="#fff5f8">
+<meta name="theme-color" content="#fff6ec">
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #fff5f8; --pink: #ff5c8a; --pink-soft: #ffd1de; --text: #4a2b36; --muted: #a27d89; }
+  :root {
+    --bg: #fff6ec;
+    --bg2: #fde8d7;
+    --card: #fffdf8;
+    --text: #4a2c2a;
+    --muted: #6b4a43;
+    --red: #c8432a;
+    --red-text: #b83a22;
+    --amber: #f2a541;
+    --pink: #f7c9d2;
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: "Mali", system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 16px 16px 32px; }
-  .top { width: 100%; max-width: 1100px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-  .top a { color: var(--text); text-decoration: none; font-weight: 600; background: var(--pink-soft); padding: 10px 16px; border-radius: 16px; }
-  .top h1 { font-size: 1.2rem; margin: 0; }
-  .stage { width: 100%; max-width: 1100px; aspect-ratio: 16 / 9; position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 8px 24px rgba(255, 92, 138, .18); background: #FFF6EC; touch-action: pan-y; }
-  .deck { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
-  .deck > section { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; }
-  .deck > section:not(.on) { display: none !important; }
-  .deck h1, .deck h2, .deck h3, .deck p, .deck ul, .deck ol { margin: 0; }
-  .deck ul { padding-left: 1.2em; }
-  .deck aside { display: none; }
-  .deck table { width: 100%; border-collapse: collapse; }
-  .deck th, .deck td { padding: .35em .6em; border-bottom: 1px solid #f0dccd; }
-  .deck tr:last-child td { border-bottom: none; }
-  .nav { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
-  .nav button { font: inherit; font-weight: 600; border: none; border-radius: 16px; padding: 12px 20px; background: var(--pink-soft); color: var(--text); cursor: pointer; }
-  .nav button.main { background: var(--pink); color: #fff; }
-  .nav button:disabled { opacity: .4; cursor: default; }
-  .count { color: var(--muted); min-width: 64px; text-align: center; }
-  .tip { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Prompt", Tahoma, sans-serif;
+    line-height: 1.6;
+  }
+  h1, h2, h3 { font-family: "Mali", Tahoma, sans-serif; line-height: 1.4; margin: 0; }
+  p, ul { margin: 0; }
+  svg { display: block; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+  section { padding: 48px 0; }
+  section.alt { background: var(--bg2); }
+  .eyebrow { font-family: "Mali", Tahoma, sans-serif; font-weight: 600; color: var(--red-text); font-size: .95rem; }
+  h2 { font-size: 1.7rem; margin: 2px 0 20px; }
+  .card { background: var(--card); border-radius: 24px; padding: 20px; box-shadow: 0 8px 24px rgba(200, 67, 42, .1); }
+  .card h3 { color: var(--red); font-size: 1.25rem; }
+  .card p { color: var(--muted); }
+  .pill { display: inline-block; font-weight: 600; font-size: .85rem; padding: 4px 14px; border-radius: 99px; background: var(--amber); color: var(--text); }
+
+  /* top bar */
+  .top { position: sticky; top: 0; z-index: 5; background: rgba(255, 246, 236, .9); backdrop-filter: blur(8px); }
+  .top .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .top a { color: var(--text); text-decoration: none; font-weight: 600; background: var(--pink); padding: 6px 14px; border-radius: 99px; font-size: .9rem; }
+  .top span { font-family: "Mali", Tahoma, sans-serif; font-weight: 700; }
+
+  /* hero */
+  .hero { background: radial-gradient(circle at 85% 15%, #fde3cc, var(--bg) 60%); padding: 40px 0 56px; position: relative; overflow: hidden; }
+  .hero h1 { font-size: clamp(2.6rem, 11vw, 4.2rem); font-weight: 700; }
+  .hero h1 span:not(.l1) { color: var(--red); }
+  .hero .sub { color: var(--muted); font-size: 1.15rem; margin: 6px 0 18px; }
+  .hero .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .hero .pill { font-size: 1rem; padding: 8px 18px; }
+  .hero .pill.pink { background: var(--pink); }
+  .leaf { position: absolute; pointer-events: none; animation: sway 4s ease-in-out infinite; }
+  .leaf.a { right: 6%; top: 24px; font-size: 64px; }
+  .leaf.b { right: 26%; top: 110px; font-size: 38px; animation-delay: -1.5s; }
+  @keyframes sway { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(14deg) translateY(6px); } }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .why .card .emoji { font-size: 2.4rem; line-height: 1.2; }
+
+  /* route */
+  .route { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .stop { flex: 1; aspect-ratio: 1; max-width: 200px; border-radius: 50%; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(200, 67, 42, .12); text-align: center; padding: 8px; }
+  .stop svg { width: 56%; height: auto; }
+  .stop h3 { font-size: 1.15rem; }
+  .stop p { font-size: .8rem; color: var(--red-text); font-weight: 500; }
+  .stop.main { background: var(--red); }
+  .stop.main h3, .stop.main p { color: var(--bg); }
+  .arrow { color: var(--amber); font-size: 1.6rem; font-weight: 700; flex: none; }
+  .note { color: var(--muted); text-align: center; margin-top: 18px; font-size: .95rem; }
+
+  /* days */
+  .days { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .day { display: flex; flex-direction: column; gap: 10px; }
+  .day svg { width: 100%; height: auto; }
+
+  /* night */
+  .night { background: radial-gradient(circle at 75% 30%, #e0613f, #a8341f 70%); color: var(--bg); }
+  .night .inner { display: flex; align-items: center; gap: 16px; }
+  .night .txt { flex: 1.2; }
+  .night .eyebrow { color: #fde3cc; }
+  .night h2 { font-size: clamp(2rem, 8vw, 3rem); margin-bottom: 8px; }
+  .night p { color: #fde3cc; }
+  .night svg { flex: 1; width: 100%; max-width: 260px; height: auto; }
+
+  .card ul { padding-left: 1.2em; }
+  .card li { color: var(--text); }
+  .food .head, .stay .head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .food .head b { font-size: 1.8rem; }
+  .stay .card p { font-size: .9rem; margin-bottom: 6px; }
+  .tip { margin-top: 14px; background: var(--amber); border-radius: 20px; padding: 14px 18px; display: flex; gap: 10px; align-items: flex-start; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #f0dccd; vertical-align: top; }
+  th { font-size: .85rem; color: var(--muted); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  th.num { text-align: right; }
+  .small { font-size: .8rem; color: var(--muted); margin-top: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chips span { background: var(--card); padding: 6px 14px; border-radius: 99px; font-size: .9rem; }
+
+  .budget { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; align-items: center; }
+  .big { background: var(--red); color: var(--bg); border-radius: 28px; padding: 28px 16px; text-align: center; }
+  .big b { display: block; font-family: "Mali", Tahoma, sans-serif; font-size: clamp(2rem, 8vw, 2.8rem); line-height: 1.3; }
+  .big span { color: #fde3cc; }
+  .big .countup { color: inherit; }
+
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .steps .pill { background: var(--red); color: var(--bg); }
+  .steps .emoji { font-size: 2rem; line-height: 1.3; margin-top: 6px; }
+  .steps h3 { color: var(--text); font-size: 1.05rem; }
+  .steps p { font-size: .9rem; }
+
+  .ask { text-align: center; background: radial-gradient(circle at 50% 40%, #fde3cc, var(--bg) 65%); padding: 64px 0 80px; }
+  .ask h2 { font-size: clamp(2.2rem, 9vw, 3.4rem); margin-bottom: 24px; }
+  .ask h2 span { color: var(--red); }
+  .ask .btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .ask button { font: inherit; font-family: "Mali", Tahoma, sans-serif; font-weight: 700; font-size: 1.3rem; border: none; border-radius: 99px; padding: 12px 34px; cursor: pointer; transition: transform .1s; }
+  .ask button:active { transform: scale(.94); }
+  .ask .yes { background: var(--red); color: var(--bg); box-shadow: 0 10px 24px rgba(200, 67, 42, .3); }
+  .ask .yes2 { background: var(--amber); color: var(--text); box-shadow: 0 10px 24px rgba(242, 165, 65, .3); }
+  .ask .hint { color: var(--muted); margin-top: 16px; }
+  .ask .answer { font-family: "Mali", Tahoma, sans-serif; font-size: 1.4rem; color: var(--red); margin-top: 20px; min-height: 1.5em; }
+  .fall { position: fixed; top: -40px; font-size: 28px; pointer-events: none; animation: fall linear forwards; z-index: 10; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+
+  @media (max-width: 600px) {
+    .grid3, .grid2, .budget { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .night .inner { flex-direction: column-reverse; align-items: flex-start; }
+    .night svg { max-width: 180px; align-self: center; }
+    .stop h3 { font-size: .95rem; }
+    .stop p { font-size: .7rem; }
+    .arrow { font-size: 1.2rem; }
+  }
+  @media (max-width: 420px) {
+    .days { gap: 10px; }
+    .day.card { padding: 14px; }
+    .day h3 { font-size: 1.05rem; }
+    .day p { font-size: .85rem; }
+    .day .pill { font-size: .75rem; padding: 3px 10px; }
+  }
+  /* ---------- motion ---------- */
+  .progress { position: fixed; left: 0; top: 0; height: 4px; width: 100%; z-index: 20; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, var(--amber), var(--red), #e86a86); }
+
+  .hero h1 .l1 { display: inline-block; animation: rise .8s cubic-bezier(.2, .9, .3, 1.3) both; }
+  .hero h1 span:not(.l1) { display: inline-block; animation: popin .9s .45s cubic-bezier(.2, 1.6, .4, 1) both, glow 2.6s 1.4s ease-in-out infinite; }
+  .hero .eyebrow { animation: rise .7s .05s both; }
+  .hero .sub { animation: rise .7s .7s both; }
+  .hero .pill { animation: popin .6s cubic-bezier(.2, 1.6, .4, 1) both; }
+  .hero .pill:nth-child(1) { animation-delay: .9s; }
+  .hero .pill:nth-child(2) { animation-delay: 1.05s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+  @keyframes popin { 0% { opacity: 0; transform: scale(.3) rotate(-8deg); } 100% { opacity: 1; transform: none; } }
+  @keyframes glow { 0%, 100% { text-shadow: 0 0 0 rgba(200, 67, 42, 0); } 50% { text-shadow: 0 0 22px rgba(242, 165, 65, .7); } }
+
+  .drift { position: absolute; top: -40px; pointer-events: none; animation: drift linear forwards; }
+  @keyframes drift {
+    0% { transform: translate(0, 0) rotate(0); opacity: 0; }
+    10% { opacity: 1; }
+    50% { transform: translate(40px, 50vh) rotate(200deg); }
+    100% { transform: translate(-20px, 100vh) rotate(420deg); opacity: 0; }
+  }
+
+  .js .reveal { opacity: 0; transform: translateY(36px) scale(.96); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .9, .3, 1.2); transition-delay: var(--d, 0s); }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  .day svg, .stop svg { transition: transform .3s cubic-bezier(.2, 1.6, .4, 1); }
+  .day:hover svg { transform: scale(1.05) rotate(-2deg); }
+  .stop:hover svg { transform: scale(1.12); }
+  .reveal.in.day svg { animation: bob 3.5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+  @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+
+  .arrow { animation: nudge 1.2s ease-in-out infinite; }
+  @keyframes nudge { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(5px); } }
+
+  .night svg circle[fill="#FDE3CC"] { animation: moon 3s ease-in-out infinite; }
+  .night svg rect[fill="#F2A541"] { animation: flicker 2.4s ease-in-out infinite; }
+  .night svg rect[fill="#F2A541"]:nth-of-type(odd) { animation-delay: -1.1s; }
+  @keyframes moon { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+  @keyframes flicker { 0%, 100% { opacity: 1; } 45% { opacity: .55; } 55% { opacity: .9; } }
+
+  .ask .yes { animation: beat 1.4s ease-in-out infinite; }
+  .ask .yes2 { animation: beat 1.4s .7s ease-in-out infinite; }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.1); } 30% { transform: scale(.98); } 45% { transform: scale(1.06); } }
+  .ask .answer.show { animation: popin .6s cubic-bezier(.2, 1.6, .4, 1) both; }
+  .burst { position: fixed; pointer-events: none; z-index: 30; font-size: 26px; animation: burst 1.1s cubic-bezier(.1, .8, .3, 1) forwards; }
+  @keyframes burst { from { transform: translate(-50%, -50%) scale(.4); opacity: 1; } to { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.2) rotate(var(--r)); opacity: 0; } }
+  .shake { animation: shake .5s; }
+  @keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-6px) rotate(-1deg); } 40% { transform: translateX(6px) rotate(1deg); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .js .reveal { opacity: 1; transform: none; }
+  }
 </style>
 </head>
 <body>
-<div class="top">
-  <a href="index.html">‹ กลับ</a>
-  <h1>ไปญี่ปุ่นกันมั้ย 🧡</h1>
-  <span style="width:64px"></span>
-</div>
-<div class="stage" id="stage"><div class="deck" id="deck">
-<section id="cover" data-transition="fade" style="background:radial-gradient(circle at 80% 20%, #FDE3CC, #FFF6EC 60%);color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
-<p style="position:absolute;right:200px;top:120px;width:200px;font-size:160px;transform:rotate(18deg)" data-build-in="pop">🍁</p>
-<p style="position:absolute;right:420px;top:300px;width:120px;font-size:88px;transform:rotate(-24deg);opacity:0.85" data-build-in="pop">🍂</p>
-<p style="position:absolute;right:180px;bottom:150px;width:160px;font-size:110px;transform:rotate(-12deg)" data-build-in="pop">🍁</p>
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:36px;font-weight:600;color:#B83A22">ทริปใบไม้เปลี่ยนสี 2027 💌</p>
-<h1 style="font-family:'Mali', Tahoma, sans-serif;font-size:128px;font-weight:700;line-height:1.4;color:#4A2C2A">ไปญี่ปุ่นกันนะ<br><span style="color:#C8432A">คิตตี้</span></h1>
-<p style="font-size:40px;color:#6B4A43">โอซาก้า · เกียวโต · อูจิ</p>
-<div style="display:flex;gap:24px">
-<p style="font-size:32px;font-weight:500;background:#F2A541;color:#4A2C2A;padding:16px 36px;border-radius:999px">🗓️ 24 พ.ย. – 1 ธ.ค. 2027</p>
-<p style="font-size:32px;font-weight:500;background:#F7C9D2;color:#4A2C2A;padding:16px 36px;border-radius:999px">8 วัน 7 คืน</p>
-</div>
-<aside>สวัสดีคิตตี้ วันนี้มีเรื่องจะชวน ปีหน้าเราไปดูใบไม้แดงที่ญี่ปุ่นด้วยกันนะ</aside>
+<script>document.documentElement.classList.add('js');</script>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap">
+    <a href="index.html">‹ กลับ</a>
+    <span>ไปญี่ปุ่นกันมั้ย 🧡</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="leaf a" aria-hidden="true">🍁</div>
+  <div class="leaf b" aria-hidden="true">🍂</div>
+  <div class="wrap">
+    <p class="eyebrow">ทริปใบไม้เปลี่ยนสี 2027 💌</p>
+    <h1><span class="l1">ไปญี่ปุ่นกันนะ</span><br><span>คิตตี้</span></h1>
+    <p class="sub">โอซาก้า · เกียวโต · อูจิ</p>
+    <div class="pills">
+      <span class="pill">🗓️ 24 พ.ย. – 1 ธ.ค. 2027</span>
+      <span class="pill pink">8 วัน 7 คืน</span>
+    </div>
+  </div>
 </section>
-<section id="why" data-transition="fade" style="background:#FFF6EC;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">ทำไมต้องช่วงนี้ 🤔</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">ปลายพฤศจิกา = ใบไม้แดงสวยที่สุด</h2>
-</div>
-<div style="display:flex;gap:32px">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:48px;border-radius:40px;box-shadow:0 12px 32px rgba(200,67,42,0.12)">
-<p style="font-size:80px">🍁</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">แดงพีคสุด</h3>
-<p style="font-size:30px;line-height:1.5;color:#6B4A43">เกียวโตกับโอซาก้า ใบไม้แดงจัดช่วง 20 พ.ย. – 5 ธ.ค. ทุกปี</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:48px;border-radius:40px;box-shadow:0 12px 32px rgba(200,67,42,0.12)">
-<p style="font-size:80px">🙅</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">หลบคนเยอะ</h3>
-<p style="font-size:30px;line-height:1.5;color:#6B4A43">ไปหลังวันหยุดญี่ปุ่น 23 พ.ย. คนญี่ปุ่นเที่ยวกันน้อยลง</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:48px;border-radius:40px;box-shadow:0 12px 32px rgba(200,67,42,0.12)">
-<p style="font-size:80px">🧣</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">หนาวกำลังดี</h3>
-<p style="font-size:30px;line-height:1.5;color:#6B4A43">5–15°C ใส่โค้ทแล้วเดินจับมือกันได้ทั้งวัน</p>
-</div>
-</div>
-<aside>ช่วงปลายพฤศจิกาเป็นช่วงที่ใบไม้ที่เกียวโตแดงที่สุด และเราเลี่ยงวันหยุดญี่ปุ่นแล้ว ปีหน้าช่วงกันยา–ตุลา จะเช็กพยากรณ์ใบไม้อีกที</aside>
+
+<section class="why">
+  <div class="wrap">
+    <p class="eyebrow">ทำไมต้องช่วงนี้ 🤔</p>
+    <h2>ปลายพฤศจิกา = ใบไม้แดงสวยที่สุด</h2>
+    <div class="grid3">
+      <div class="card"><div class="emoji">🍁</div><h3>แดงพีคสุด</h3><p>เกียวโตกับโอซาก้า ใบไม้แดงจัดช่วง 20 พ.ย. – 5 ธ.ค. ทุกปี</p></div>
+      <div class="card"><div class="emoji">🙅</div><h3>หลบคนเยอะ</h3><p>ไปหลังวันหยุดญี่ปุ่น 23 พ.ย. คนญี่ปุ่นเที่ยวกันน้อยลง</p></div>
+      <div class="card"><div class="emoji">🧣</div><h3>หนาวกำลังดี</h3><p>5–15°C ใส่โค้ทแล้วเดินจับมือกันได้ทั้งวัน</p></div>
+    </div>
+  </div>
 </section>
-<section id="route" data-transition="fade" style="background:#FDE8D7;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:64px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">เส้นทางของเรา 🗺️</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">บินไปคันไซ เที่ยว 3 เมือง</h2>
-</div>
-<div style="display:flex;align-items:center;justify-content:space-between">
-<div style="width:400px;height:400px;border-radius:50%;background:#FFFDF8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 32px rgba(200,67,42,0.15)">
-<svg aria-label="ปราสาทโอซาก้า" width="180" height="130" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><path d="M30 128 L150 128 L138 98 L42 98 Z" fill="#B9A99A"/><rect x="56" y="66" width="68" height="32" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><rect x="82" y="76" width="16" height="22" fill="#4A2C2A"/><path d="M42 70 L138 70 L126 58 L54 58 Z" fill="#5E9C8F"/><rect x="66" y="38" width="48" height="20" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M54 42 L126 42 L90 16 Z" fill="#5E9C8F"/><circle cx="90" cy="16" r="4" fill="#E5B23A"/></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:52px;font-weight:700;color:#4A2C2A">โอซาก้า</h3>
-<p style="font-size:30px;font-weight:500;color:#B83A22">2 คืน</p>
-</div>
-<svg aria-hidden="true" width="110" height="56" viewBox="0 0 110 56"><path d="M0 16 H66 V0 L110 28 L66 56 V40 H0 Z" fill="#F2A541"/></svg>
-<div style="width:400px;height:400px;border-radius:50%;background:#C8432A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 32px rgba(200,67,42,0.25)">
-<svg aria-label="เสาโทริอิ" width="180" height="130" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><path d="M18 18 Q90 32 162 18 L160 32 Q90 44 20 32 Z" fill="#4A2C2A"/><path d="M26 32 Q90 44 154 32 L152 42 Q90 52 28 42 Z" fill="#FFF6EC"/><rect x="34" y="60" width="112" height="9" fill="#FFF6EC"/><rect x="48" y="42" width="13" height="86" fill="#FFF6EC"/><rect x="119" y="42" width="13" height="86" fill="#FFF6EC"/><rect x="84" y="46" width="12" height="14" fill="#FFF6EC"/></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:52px;font-weight:700;color:#FFF6EC">เกียวโต</h3>
-<p style="font-size:30px;font-weight:500;color:#FFF6EC">5 คืน</p>
-</div>
-<svg aria-hidden="true" width="110" height="56" viewBox="0 0 110 56"><path d="M0 16 H66 V0 L110 28 L66 56 V40 H0 Z" fill="#F2A541"/></svg>
-<div style="width:400px;height:400px;border-radius:50%;background:#FFFDF8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 32px rgba(200,67,42,0.15)">
-<svg aria-label="ถ้วยมัทฉะอูจิ" width="180" height="130" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><path d="M62 32 Q54 20 62 8 M90 32 Q82 20 90 6 M118 32 Q110 20 118 8" stroke="#B9A99A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M28 50 H152 Q150 118 90 120 Q30 118 28 50 Z" fill="#8A5A44"/><ellipse cx="90" cy="50" rx="62" ry="12" fill="#7BA05B"/><ellipse cx="90" cy="50" rx="44" ry="7" fill="#A9C97A"/><rect x="66" y="118" width="48" height="8" rx="4" fill="#6B4A43"/></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:52px;font-weight:700;color:#4A2C2A">อูจิ</h3>
-<p style="font-size:30px;font-weight:500;color:#B83A22">ไปกลับ 1 วัน</p>
-</div>
-</div>
-<p style="font-size:30px;color:#6B4A43;text-align:center">✈️ ขาไปและขากลับที่สนามบินคันไซ (KIX) · บินจากกรุงเทพฯ ประมาณ 6 ชม.</p>
-<aside>นอนโอซาก้า 2 คืนก่อน แล้วย้ายไปเกียวโต 5 คืน อูจิไปเช้าเย็นกลับจากเกียวโต นั่งรถไฟแค่ 20–30 นาที</aside>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="eyebrow">เส้นทางของเรา 🗺️</p>
+    <h2>บินไปคันไซ เที่ยว 3 เมือง</h2>
+    <div class="route">
+      <div class="stop">
+        <svg aria-label="ปราสาทโอซาก้า" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><path d="M30 128 L150 128 L138 98 L42 98 Z" fill="#B9A99A"/><rect x="56" y="66" width="68" height="32" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><rect x="82" y="76" width="16" height="22" fill="#4A2C2A"/><path d="M42 70 L138 70 L126 58 L54 58 Z" fill="#5E9C8F"/><rect x="66" y="38" width="48" height="20" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M54 42 L126 42 L90 16 Z" fill="#5E9C8F"/><circle cx="90" cy="16" r="4" fill="#E5B23A"/></svg>
+        <h3>โอซาก้า</h3><p>2 คืน</p>
+      </div>
+      <span class="arrow" aria-hidden="true">➜</span>
+      <div class="stop main">
+        <svg aria-label="เสาโทริอิ" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><path d="M18 18 Q90 32 162 18 L160 32 Q90 44 20 32 Z" fill="#4A2C2A"/><path d="M26 32 Q90 44 154 32 L152 42 Q90 52 28 42 Z" fill="#FFF6EC"/><rect x="34" y="60" width="112" height="9" fill="#FFF6EC"/><rect x="48" y="42" width="13" height="86" fill="#FFF6EC"/><rect x="119" y="42" width="13" height="86" fill="#FFF6EC"/><rect x="84" y="46" width="12" height="14" fill="#FFF6EC"/></svg>
+        <h3>เกียวโต</h3><p>5 คืน</p>
+      </div>
+      <span class="arrow" aria-hidden="true">➜</span>
+      <div class="stop">
+        <svg aria-label="ถ้วยมัทฉะอูจิ" viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><path d="M62 32 Q54 20 62 8 M90 32 Q82 20 90 6 M118 32 Q110 20 118 8" stroke="#B9A99A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M28 50 H152 Q150 118 90 120 Q30 118 28 50 Z" fill="#8A5A44"/><ellipse cx="90" cy="50" rx="62" ry="12" fill="#7BA05B"/><ellipse cx="90" cy="50" rx="44" ry="7" fill="#A9C97A"/><rect x="66" y="118" width="48" height="8" rx="4" fill="#6B4A43"/></svg>
+        <h3>อูจิ</h3><p>ไปกลับ 1 วัน</p>
+      </div>
+    </div>
+    <p class="note">✈️ ไป-กลับสนามบินคันไซ (KIX) · บินจากกรุงเทพฯ ประมาณ 6 ชม.</p>
+  </div>
 </section>
-<section id="days1" data-transition="push" style="background:#FFF6EC;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">แผนเที่ยว ตอนที่ 1</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">วันที่ 1–4 ✨</h2>
-</div>
-<div style="display:flex;gap:28px">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 1 · พ. 24</p>
-<svg aria-label="เครื่องบินลงจอดที่โอซาก้า" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c1"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c1)"><rect width="200" height="140" fill="#DCEFF3"/><circle cx="164" cy="30" r="16" fill="#F2A541"/><ellipse cx="44" cy="36" rx="22" ry="9" fill="#FFFDF8"/><ellipse cx="60" cy="30" rx="14" ry="9" fill="#FFFDF8"/><rect y="118" width="200" height="22" fill="#A9C97A"/><rect x="20" y="126" width="24" height="4" rx="2" fill="#FFFDF8"/><rect x="70" y="126" width="24" height="4" rx="2" fill="#FFFDF8"/><rect x="120" y="126" width="24" height="4" rx="2" fill="#FFFDF8"/><g transform="rotate(14 100 72)"><path d="M90 66 L74 42 L86 42 L110 66 Z" fill="#C8432A"/><rect x="52" y="64" width="100" height="18" rx="9" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M90 80 L76 102 L88 102 L110 80 Z" fill="#C8432A"/><path d="M56 66 L48 50 L58 50 L70 65 Z" fill="#C8432A"/><circle cx="118" cy="72" r="3" fill="#4A2C2A"/><circle cx="128" cy="72" r="3" fill="#4A2C2A"/><circle cx="138" cy="72" r="3" fill="#4A2C2A"/></g></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">ถึงโอซาก้า</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">เช็กอินแถวนัมบะ ตกเย็นเดินเล่นโดทงโบริ กินทาโกะยากิ</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 2 · พฤ. 25</p>
-<svg aria-label="น้ำตกมิโนะกับต้นเมเปิลแดง" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c2"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c2)"><rect width="200" height="140" fill="#FDE8D7"/><path d="M64 14 Q100 4 136 14 L140 124 L60 124 Z" fill="#8A5A44"/><rect x="86" y="14" width="28" height="104" rx="8" fill="#BFE0EA"/><path d="M95 22 V108 M105 28 V112" stroke="#FFFDF8" stroke-width="3" stroke-linecap="round"/><ellipse cx="100" cy="124" rx="60" ry="14" fill="#9ACFDD"/><rect x="34" y="78" width="7" height="46" fill="#6B4A43"/><circle cx="28" cy="70" r="17" fill="#C8432A"/><circle cx="48" cy="68" r="15" fill="#E0613F"/><circle cx="38" cy="54" r="15" fill="#F2A541"/><rect x="160" y="80" width="7" height="44" fill="#6B4A43"/><circle cx="154" cy="72" r="16" fill="#F2A541"/><circle cx="174" cy="70" r="16" fill="#C8432A"/><circle cx="164" cy="56" r="14" fill="#E0613F"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">Minoo Park</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">เดินป่าใบไม้แดงไปน้ำตก บ่ายไปปราสาทโอซาก้า เย็นไปชินเซไก</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 3 · ศ. 26</p>
-<svg aria-label="ป่าไผ่อาราชิยามะ" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c3"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c3)"><rect width="200" height="140" fill="#E4F0DC"/><path d="M84 140 L116 140 L104 64 L96 64 Z" fill="#F4E3C3"/><rect x="18" width="14" height="140" fill="#5E8A45"/><rect x="44" width="12" height="140" fill="#7BA05B"/><rect x="66" width="10" height="140" fill="#5E8A45"/><rect x="124" width="10" height="140" fill="#5E8A45"/><rect x="144" width="12" height="140" fill="#7BA05B"/><rect x="168" width="14" height="140" fill="#5E8A45"/><path d="M18 44 H32 M44 60 H56 M66 36 H76 M124 50 H134 M144 30 H156 M168 66 H182 M18 98 H32 M44 110 H56 M66 92 H76 M124 104 H134 M144 88 H156 M168 116 H182" stroke="#3F6B30" stroke-width="3"/><circle cx="100" cy="28" r="18" fill="#C8432A"/><circle cx="84" cy="38" r="12" fill="#F2A541"/><circle cx="117" cy="40" r="12" fill="#E0613F"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">อาราชิยามะ</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">ย้ายเข้าเกียวโต ป่าไผ่ วัดเท็นริวจิ นั่งรถไฟสาย Sagano Torokko</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 4 · ส. 27</p>
-<svg aria-label="วัดคิโยมิสึกับระเบียงไม้" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c4"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c4)"><rect width="200" height="140" fill="#FDE8D7"/><path d="M60 82 V126 M76 82 V126 M92 82 V126 M108 82 V126 M124 82 V126 M140 82 V126 M58 104 H142" stroke="#6B4A43" stroke-width="4"/><rect x="48" y="74" width="104" height="9" fill="#8A5A44"/><rect x="64" y="50" width="72" height="25" fill="#C8432A"/><path d="M48 54 L100 30 L152 54 Z" fill="#4A2C2A"/><ellipse cx="22" cy="122" rx="42" ry="28" fill="#C8432A"/><ellipse cx="180" cy="120" rx="40" ry="28" fill="#F2A541"/><ellipse cx="100" cy="138" rx="70" ry="16" fill="#E0613F"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">คิโยมิสึ</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">ไปตั้งแต่ 6 โมงเช้า เดินซันเนนซากะ กลางคืนดูไฟประดับวัดเอคันโด</p>
-</div>
-</div>
-<aside>สองวันแรกอยู่โอซาก้า วันที่สามย้ายเข้าเกียวโต วันที่สี่ต้องตื่นเช้าหน่อยนะ เพื่อได้รูปสวย ๆ ที่คิโยมิสึ</aside>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">แผนเที่ยว ✨</p>
+    <h2>8 วันของเรา</h2>
+    <div class="days">
+      <div class="card day">
+        <span class="pill">วันที่ 1 · พ. 24 พ.ย.</span>
+        <svg aria-label="เครื่องบินลงจอดที่โอซาก้า" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c1"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c1)"><rect width="200" height="140" fill="#DCEFF3"/><circle cx="164" cy="30" r="16" fill="#F2A541"/><ellipse cx="44" cy="36" rx="22" ry="9" fill="#FFFDF8"/><ellipse cx="60" cy="30" rx="14" ry="9" fill="#FFFDF8"/><rect y="118" width="200" height="22" fill="#A9C97A"/><rect x="20" y="126" width="24" height="4" rx="2" fill="#FFFDF8"/><rect x="70" y="126" width="24" height="4" rx="2" fill="#FFFDF8"/><rect x="120" y="126" width="24" height="4" rx="2" fill="#FFFDF8"/><g transform="rotate(14 100 72)"><path d="M90 66 L74 42 L86 42 L110 66 Z" fill="#C8432A"/><rect x="52" y="64" width="100" height="18" rx="9" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M90 80 L76 102 L88 102 L110 80 Z" fill="#C8432A"/><path d="M56 66 L48 50 L58 50 L70 65 Z" fill="#C8432A"/><circle cx="118" cy="72" r="3" fill="#4A2C2A"/><circle cx="128" cy="72" r="3" fill="#4A2C2A"/><circle cx="138" cy="72" r="3" fill="#4A2C2A"/></g></g></svg>
+        <h3>ถึงโอซาก้า</h3>
+        <p>เช็กอินแถวนัมบะ ตกเย็นเดินเล่นโดทงโบริ กินทาโกะยากิ</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 2 · พฤ. 25 พ.ย.</span>
+        <svg aria-label="น้ำตกมิโนะกับต้นเมเปิลแดง" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c2"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c2)"><rect width="200" height="140" fill="#FDE8D7"/><path d="M64 14 Q100 4 136 14 L140 124 L60 124 Z" fill="#8A5A44"/><rect x="86" y="14" width="28" height="104" rx="8" fill="#BFE0EA"/><path d="M95 22 V108 M105 28 V112" stroke="#FFFDF8" stroke-width="3" stroke-linecap="round"/><ellipse cx="100" cy="124" rx="60" ry="14" fill="#9ACFDD"/><rect x="34" y="78" width="7" height="46" fill="#6B4A43"/><circle cx="28" cy="70" r="17" fill="#C8432A"/><circle cx="48" cy="68" r="15" fill="#E0613F"/><circle cx="38" cy="54" r="15" fill="#F2A541"/><rect x="160" y="80" width="7" height="44" fill="#6B4A43"/><circle cx="154" cy="72" r="16" fill="#F2A541"/><circle cx="174" cy="70" r="16" fill="#C8432A"/><circle cx="164" cy="56" r="14" fill="#E0613F"/></g></svg>
+        <h3>Minoo Park</h3>
+        <p>เดินป่าใบไม้แดงไปน้ำตก บ่ายไปปราสาทโอซาก้า เย็นไปชินเซไก</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 3 · ศ. 26 พ.ย.</span>
+        <svg aria-label="ป่าไผ่อาราชิยามะ" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c3"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c3)"><rect width="200" height="140" fill="#E4F0DC"/><path d="M84 140 L116 140 L104 64 L96 64 Z" fill="#F4E3C3"/><rect x="18" width="14" height="140" fill="#5E8A45"/><rect x="44" width="12" height="140" fill="#7BA05B"/><rect x="66" width="10" height="140" fill="#5E8A45"/><rect x="124" width="10" height="140" fill="#5E8A45"/><rect x="144" width="12" height="140" fill="#7BA05B"/><rect x="168" width="14" height="140" fill="#5E8A45"/><path d="M18 44 H32 M44 60 H56 M66 36 H76 M124 50 H134 M144 30 H156 M168 66 H182 M18 98 H32 M44 110 H56 M66 92 H76 M124 104 H134 M144 88 H156 M168 116 H182" stroke="#3F6B30" stroke-width="3"/><circle cx="100" cy="28" r="18" fill="#C8432A"/><circle cx="84" cy="38" r="12" fill="#F2A541"/><circle cx="117" cy="40" r="12" fill="#E0613F"/></g></svg>
+        <h3>อาราชิยามะ</h3>
+        <p>ย้ายเข้าเกียวโต ป่าไผ่ วัดเท็นริวจิ นั่งรถไฟสาย Sagano Torokko</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 4 · ส. 27 พ.ย.</span>
+        <svg aria-label="วัดคิโยมิสึกับระเบียงไม้" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c4"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c4)"><rect width="200" height="140" fill="#FDE8D7"/><path d="M60 82 V126 M76 82 V126 M92 82 V126 M108 82 V126 M124 82 V126 M140 82 V126 M58 104 H142" stroke="#6B4A43" stroke-width="4"/><rect x="48" y="74" width="104" height="9" fill="#8A5A44"/><rect x="64" y="50" width="72" height="25" fill="#C8432A"/><path d="M48 54 L100 30 L152 54 Z" fill="#4A2C2A"/><ellipse cx="22" cy="122" rx="42" ry="28" fill="#C8432A"/><ellipse cx="180" cy="120" rx="40" ry="28" fill="#F2A541"/><ellipse cx="100" cy="138" rx="70" ry="16" fill="#E0613F"/></g></svg>
+        <h3>คิโยมิสึ</h3>
+        <p>ไปตั้งแต่ 6 โมงเช้า เดินซันเนนซากะ กลางคืนดูไฟประดับวัดเอคันโด</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 5 · อา. 28 พ.ย.</span>
+        <svg aria-label="สะพานวัดโทฟุคุจิเหนือหุบใบไม้แดง" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c5"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c5)"><rect width="200" height="140" fill="#FDE8D7"/><circle cx="30" cy="18" r="16" fill="#E0613F"/><circle cx="170" cy="16" r="18" fill="#C8432A"/><path d="M40 78 V120 M80 78 V120 M120 78 V120 M160 78 V120" stroke="#6B4A43" stroke-width="5"/><rect x="10" y="56" width="180" height="22" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M30 60 V76 M60 60 V76 M90 60 V76 M120 60 V76 M150 60 V76 M180 60 V76" stroke="#8A5A44" stroke-width="3"/><path d="M4 58 L196 58 L184 44 L16 44 Z" fill="#4A2C2A"/><circle cx="20" cy="104" r="24" fill="#C8432A"/><circle cx="54" cy="100" r="22" fill="#F2A541"/><circle cx="88" cy="106" r="24" fill="#E0613F"/><circle cx="122" cy="100" r="22" fill="#C8432A"/><circle cx="156" cy="106" r="24" fill="#F2A541"/><circle cx="188" cy="100" r="22" fill="#E0613F"/><circle cx="36" cy="134" r="22" fill="#E0613F"/><circle cx="104" cy="136" r="24" fill="#C8432A"/><circle cx="170" cy="134" r="22" fill="#C8432A"/></g></svg>
+        <h3>โทฟุคุจิ</h3>
+        <p>สะพานใบไม้แดงตอนเช้า ต่อด้วยเสาโทริอิฟุชิมิอินาริ เย็นเดินเล่นปอนโตโจ</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 6 · จ. 29 พ.ย.</span>
+        <svg aria-label="วัดเบียวโดอินริมสระที่อูจิ" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c6"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c6)"><rect width="200" height="140" fill="#DCEFF3"/><circle cx="26" cy="30" r="14" fill="#F2A541"/><circle cx="176" cy="28" r="16" fill="#C8432A"/><circle cx="160" cy="36" r="10" fill="#E0613F"/><rect y="96" width="200" height="44" fill="#9ACFDD"/><rect x="36" y="66" width="128" height="14" fill="#C8432A"/><path d="M28 68 L172 68 L164 58 L36 58 Z" fill="#4A2C2A"/><rect x="36" y="80" width="6" height="16" fill="#8A5A44"/><rect x="158" y="80" width="6" height="16" fill="#8A5A44"/><rect x="80" y="52" width="40" height="44" fill="#C8432A"/><rect x="92" y="66" width="16" height="30" fill="#F2A541"/><path d="M68 56 L100 34 L132 56 Z" fill="#4A2C2A"/><circle cx="100" cy="32" r="4" fill="#F2A541"/><rect x="80" y="100" width="40" height="22" fill="#C8432A" opacity="0.35"/><rect x="36" y="100" width="128" height="8" fill="#C8432A" opacity="0.25"/></g></svg>
+        <h3>อูจิ</h3>
+        <p>วัดเบียวโดอิน ทางเดินใบไม้แดงวัดโคโชจิ กินมัทฉะริมแม่น้ำ</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 7 · อ. 30 พ.ย.</span>
+        <svg aria-label="วัดคินคาคุจิสีทองกับหัวใจ" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c7"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c7)"><rect width="200" height="140" fill="#FDE8D7"/><rect y="100" width="200" height="40" fill="#9ACFDD"/><circle cx="26" cy="86" r="20" fill="#C8432A"/><circle cx="46" cy="96" r="14" fill="#F2A541"/><circle cx="182" cy="92" r="18" fill="#E0613F"/><rect x="72" y="76" width="56" height="24" fill="#E5B23A"/><path d="M62 78 L138 78 L130 70 L70 70 Z" fill="#4A2C2A"/><rect x="77" y="52" width="46" height="18" fill="#E5B23A"/><path d="M68 54 L132 54 L124 46 L76 46 Z" fill="#4A2C2A"/><rect x="85" y="34" width="30" height="12" fill="#E5B23A"/><path d="M78 36 L122 36 L100 20 Z" fill="#4A2C2A"/><rect x="72" y="104" width="56" height="16" fill="#E5B23A" opacity="0.4"/><path d="M156 30 C156 21 168 20 170 28 C172 20 184 21 184 30 C184 40 172 46 170 52 C168 46 156 40 156 30 Z" fill="#E86A86"/></g></svg>
+        <h3>วันพิเศษ 💕</h3>
+        <p>คินคาคุจิ ทางเดินนักปรัชญา ปิดท้ายด้วยดินเนอร์ไคเซกิที่กิออน</p>
+      </div>
+      <div class="card day">
+        <span class="pill">วันที่ 8 · พ. 1 ธ.ค.</span>
+        <svg aria-label="เครื่องบินขึ้นกับกระเป๋าเดินทาง" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c8"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c8)"><rect width="200" height="140" fill="#DCEFF3"/><circle cx="34" cy="30" r="14" fill="#F2A541"/><ellipse cx="150" cy="114" rx="26" ry="9" fill="#FFFDF8"/><ellipse cx="166" cy="108" rx="15" ry="9" fill="#FFFDF8"/><g transform="translate(24 -12) rotate(-16 100 72)"><path d="M90 66 L74 42 L86 42 L110 66 Z" fill="#C8432A"/><rect x="52" y="64" width="100" height="18" rx="9" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M90 80 L76 102 L88 102 L110 80 Z" fill="#C8432A"/><path d="M56 66 L48 50 L58 50 L70 65 Z" fill="#C8432A"/><circle cx="118" cy="72" r="3" fill="#4A2C2A"/><circle cx="128" cy="72" r="3" fill="#4A2C2A"/><circle cx="138" cy="72" r="3" fill="#4A2C2A"/></g><path d="M36 82 V72 H54 V82" stroke="#4A2C2A" stroke-width="4" fill="none"/><rect x="22" y="80" width="46" height="44" rx="8" fill="#F2A541"/><rect x="22" y="94" width="46" height="6" fill="#C8432A"/><path d="M40 110 C40 106 45 106 45 110 C45 106 50 106 50 110 C50 114 45 117 45 119 C45 117 40 114 40 110 Z" fill="#E86A86"/></g></svg>
+        <h3>กลับบ้าน</h3>
+        <p>นั่งรถไฟ Haruka ไปสนามบินคันไซ พร้อมรูปคู่เต็มเครื่อง</p>
+      </div>
+    </div>
+  </div>
 </section>
-<section id="days2" data-transition="push" style="background:#FFF6EC;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">แผนเที่ยว ตอนที่ 2</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">วันที่ 5–8 ✨</h2>
-</div>
-<div style="display:flex;gap:28px">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 5 · อา. 28</p>
-<svg aria-label="สะพานวัดโทฟุคุจิเหนือหุบใบไม้แดง" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c5"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c5)"><rect width="200" height="140" fill="#FDE8D7"/><circle cx="30" cy="18" r="16" fill="#E0613F"/><circle cx="170" cy="16" r="18" fill="#C8432A"/><path d="M40 78 V120 M80 78 V120 M120 78 V120 M160 78 V120" stroke="#6B4A43" stroke-width="5"/><rect x="10" y="56" width="180" height="22" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M30 60 V76 M60 60 V76 M90 60 V76 M120 60 V76 M150 60 V76 M180 60 V76" stroke="#8A5A44" stroke-width="3"/><path d="M4 58 L196 58 L184 44 L16 44 Z" fill="#4A2C2A"/><circle cx="20" cy="104" r="24" fill="#C8432A"/><circle cx="54" cy="100" r="22" fill="#F2A541"/><circle cx="88" cy="106" r="24" fill="#E0613F"/><circle cx="122" cy="100" r="22" fill="#C8432A"/><circle cx="156" cy="106" r="24" fill="#F2A541"/><circle cx="188" cy="100" r="22" fill="#E0613F"/><circle cx="36" cy="134" r="22" fill="#E0613F"/><circle cx="104" cy="136" r="24" fill="#C8432A"/><circle cx="170" cy="134" r="22" fill="#C8432A"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">โทฟุคุจิ</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">สะพานใบไม้แดงตอนเช้า ต่อด้วยเสาโทริอิฟุชิมิอินาริ เย็นเดินเล่นปอนโตโจ</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 6 · จ. 29</p>
-<svg aria-label="วัดเบียวโดอินริมสระที่อูจิ" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c6"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c6)"><rect width="200" height="140" fill="#DCEFF3"/><circle cx="26" cy="30" r="14" fill="#F2A541"/><circle cx="176" cy="28" r="16" fill="#C8432A"/><circle cx="160" cy="36" r="10" fill="#E0613F"/><rect y="96" width="200" height="44" fill="#9ACFDD"/><rect x="36" y="66" width="128" height="14" fill="#C8432A"/><path d="M28 68 L172 68 L164 58 L36 58 Z" fill="#4A2C2A"/><rect x="36" y="80" width="6" height="16" fill="#8A5A44"/><rect x="158" y="80" width="6" height="16" fill="#8A5A44"/><rect x="80" y="52" width="40" height="44" fill="#C8432A"/><rect x="92" y="66" width="16" height="30" fill="#F2A541"/><path d="M68 56 L100 34 L132 56 Z" fill="#4A2C2A"/><circle cx="100" cy="32" r="4" fill="#F2A541"/><rect x="80" y="100" width="40" height="22" fill="#C8432A" opacity="0.35"/><rect x="36" y="100" width="128" height="8" fill="#C8432A" opacity="0.25"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">อูจิ</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">วัดเบียวโดอิน ทางเดินใบไม้แดงวัดโคโชจิ กินมัทฉะริมแม่น้ำ</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 7 · อ. 30</p>
-<svg aria-label="วัดคินคาคุจิสีทองกับหัวใจ" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c7"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c7)"><rect width="200" height="140" fill="#FDE8D7"/><rect y="100" width="200" height="40" fill="#9ACFDD"/><circle cx="26" cy="86" r="20" fill="#C8432A"/><circle cx="46" cy="96" r="14" fill="#F2A541"/><circle cx="182" cy="92" r="18" fill="#E0613F"/><rect x="72" y="76" width="56" height="24" fill="#E5B23A"/><path d="M62 78 L138 78 L130 70 L70 70 Z" fill="#4A2C2A"/><rect x="77" y="52" width="46" height="18" fill="#E5B23A"/><path d="M68 54 L132 54 L124 46 L76 46 Z" fill="#4A2C2A"/><rect x="85" y="34" width="30" height="12" fill="#E5B23A"/><path d="M78 36 L122 36 L100 20 Z" fill="#4A2C2A"/><rect x="72" y="104" width="56" height="16" fill="#E5B23A" opacity="0.4"/><path d="M156 30 C156 21 168 20 170 28 C172 20 184 21 184 30 C184 40 172 46 170 52 C168 46 156 40 156 30 Z" fill="#E86A86"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">วันพิเศษ</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">คินคาคุจิ ทางเดินนักปรัชญา ปิดท้ายด้วยดินเนอร์ไคเซกิที่กิออน</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:36px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#F2A541;color:#4A2C2A;padding:8px 20px;border-radius:999px;align-self:start">วันที่ 8 · พ. 1 ธ.ค.</p>
-<svg aria-label="เครื่องบินขึ้นกับกระเป๋าเดินทาง" width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c8"><rect width="200" height="140" rx="28"/></clipPath></defs><g clip-path="url(#c8)"><rect width="200" height="140" fill="#DCEFF3"/><circle cx="34" cy="30" r="14" fill="#F2A541"/><ellipse cx="150" cy="114" rx="26" ry="9" fill="#FFFDF8"/><ellipse cx="166" cy="108" rx="15" ry="9" fill="#FFFDF8"/><g transform="translate(24 -12) rotate(-16 100 72)"><path d="M90 66 L74 42 L86 42 L110 66 Z" fill="#C8432A"/><rect x="52" y="64" width="100" height="18" rx="9" fill="#FFFDF8" stroke="#4A2C2A" stroke-width="3"/><path d="M90 80 L76 102 L88 102 L110 80 Z" fill="#C8432A"/><path d="M56 66 L48 50 L58 50 L70 65 Z" fill="#C8432A"/><circle cx="118" cy="72" r="3" fill="#4A2C2A"/><circle cx="128" cy="72" r="3" fill="#4A2C2A"/><circle cx="138" cy="72" r="3" fill="#4A2C2A"/></g><path d="M36 82 V72 H54 V82" stroke="#4A2C2A" stroke-width="4" fill="none"/><rect x="22" y="80" width="46" height="44" rx="8" fill="#F2A541"/><rect x="22" y="94" width="46" height="6" fill="#C8432A"/><path d="M40 110 C40 106 45 106 45 110 C45 106 50 106 50 110 C50 114 45 117 45 119 C45 117 40 114 40 110 Z" fill="#E86A86"/></g></svg>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:38px;font-weight:700;color:#C8432A">กลับบ้าน</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">นั่งรถไฟ Haruka ไปสนามบินคันไซ พร้อมรูปคู่เต็มเครื่อง</p>
-</div>
-</div>
-<aside>วันที่เจ็ดเป็นวันพิเศษของเรา มีดินเนอร์ไคเซกิที่กิออน ถ้าอยากไปวัดรุริโคอินต้องจองออนไลน์ล่วงหน้า</aside>
+
+<section class="night">
+  <div class="wrap inner">
+    <div class="txt">
+      <p class="eyebrow">ไฮไลต์ที่รอไม่ไหว</p>
+      <h2>ใบไม้แดง<br>ใต้แสงไฟ</h2>
+      <p>คืนวันที่ 4 · ไฟประดับวัดเอคันโด เกียวโต<br>มุมนี้แหละที่อยากถ่ายรูปคู่กับคิตตี้ที่สุด 📸</p>
+    </div>
+    <svg aria-label="เจดีย์ใต้แสงจันทร์กับใบไม้แดงเรืองแสง" viewBox="0 0 480 560" xmlns="http://www.w3.org/2000/svg"><circle cx="370" cy="96" r="58" fill="#FDE3CC" opacity="0.9"/><rect x="236" y="130" width="8" height="82" fill="#2E1A18"/><rect x="228" y="150" width="24" height="5" fill="#2E1A18"/><rect x="230" y="166" width="20" height="5" fill="#2E1A18"/><rect x="232" y="182" width="16" height="5" fill="#2E1A18"/><rect x="180" y="470" width="120" height="90" fill="#5A2418"/><rect x="228" y="490" width="24" height="30" fill="#F2A541"/><path d="M120 474 L360 474 L330 448 L150 448 Z" fill="#2E1A18"/><rect x="188" y="400" width="104" height="48" fill="#5A2418"/><rect x="230" y="414" width="20" height="22" fill="#F2A541"/><path d="M136 404 L344 404 L318 380 L162 380 Z" fill="#2E1A18"/><rect x="196" y="336" width="88" height="44" fill="#5A2418"/><rect x="232" y="348" width="16" height="20" fill="#F2A541"/><path d="M150 340 L330 340 L306 318 L174 318 Z" fill="#2E1A18"/><rect x="204" y="276" width="72" height="42" fill="#5A2418"/><rect x="234" y="288" width="12" height="18" fill="#F2A541"/><path d="M164 280 L316 280 L296 260 L184 260 Z" fill="#2E1A18"/><rect x="212" y="222" width="56" height="38" fill="#5A2418"/><rect x="236" y="232" width="8" height="16" fill="#F2A541"/><path d="M178 226 L302 226 L286 208 L194 208 Z" fill="#2E1A18"/><circle cx="60" cy="470" r="60" fill="#E0613F"/><circle cx="110" cy="505" r="50" fill="#F2A541"/><circle cx="26" cy="525" r="42" fill="#FFB36B"/><circle cx="420" cy="480" r="60" fill="#F2A541"/><circle cx="462" cy="525" r="44" fill="#E0613F"/><circle cx="376" cy="530" r="40" fill="#FFB36B"/><ellipse cx="90" cy="200" rx="9" ry="4" fill="#FFB36B" transform="rotate(30 90 200)"/><ellipse cx="140" cy="300" rx="8" ry="4" fill="#F2A541" transform="rotate(-20 140 300)"/><ellipse cx="400" cy="260" rx="9" ry="4" fill="#FFB36B" transform="rotate(40 400 260)"/><ellipse cx="360" cy="360" rx="8" ry="4" fill="#F2A541" transform="rotate(-35 360 360)"/></svg>
+  </div>
 </section>
-<section id="night" data-transition="fade" style="background:radial-gradient(circle at 75% 30%, #E0613F, #A8341F 70%);color:#FFF6EC;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:32px">
-<svg aria-label="เจดีย์ใต้แสงจันทร์กับใบไม้แดงเรืองแสง" style="position:absolute;right:160px;top:280px;width:480px;height:560px" width="480" height="560" viewBox="0 0 480 560" xmlns="http://www.w3.org/2000/svg"><circle cx="370" cy="96" r="58" fill="#FDE3CC" opacity="0.9"/><rect x="236" y="130" width="8" height="82" fill="#2E1A18"/><rect x="228" y="150" width="24" height="5" fill="#2E1A18"/><rect x="230" y="166" width="20" height="5" fill="#2E1A18"/><rect x="232" y="182" width="16" height="5" fill="#2E1A18"/><rect x="180" y="470" width="120" height="90" fill="#5A2418"/><rect x="228" y="490" width="24" height="30" fill="#F2A541"/><path d="M120 474 L360 474 L330 448 L150 448 Z" fill="#2E1A18"/><rect x="188" y="400" width="104" height="48" fill="#5A2418"/><rect x="230" y="414" width="20" height="22" fill="#F2A541"/><path d="M136 404 L344 404 L318 380 L162 380 Z" fill="#2E1A18"/><rect x="196" y="336" width="88" height="44" fill="#5A2418"/><rect x="232" y="348" width="16" height="20" fill="#F2A541"/><path d="M150 340 L330 340 L306 318 L174 318 Z" fill="#2E1A18"/><rect x="204" y="276" width="72" height="42" fill="#5A2418"/><rect x="234" y="288" width="12" height="18" fill="#F2A541"/><path d="M164 280 L316 280 L296 260 L184 260 Z" fill="#2E1A18"/><rect x="212" y="222" width="56" height="38" fill="#5A2418"/><rect x="236" y="232" width="8" height="16" fill="#F2A541"/><path d="M178 226 L302 226 L286 208 L194 208 Z" fill="#2E1A18"/><circle cx="60" cy="470" r="60" fill="#E0613F"/><circle cx="110" cy="505" r="50" fill="#F2A541"/><circle cx="26" cy="525" r="42" fill="#FFB36B"/><circle cx="420" cy="480" r="60" fill="#F2A541"/><circle cx="462" cy="525" r="44" fill="#E0613F"/><circle cx="376" cy="530" r="40" fill="#FFB36B"/><ellipse cx="90" cy="200" rx="9" ry="4" fill="#FFB36B" transform="rotate(30 90 200)"/><ellipse cx="140" cy="300" rx="8" ry="4" fill="#F2A541" transform="rotate(-20 140 300)"/><ellipse cx="400" cy="260" rx="9" ry="4" fill="#FFB36B" transform="rotate(40 400 260)"/><ellipse cx="360" cy="360" rx="8" ry="4" fill="#F2A541" transform="rotate(-35 360 360)"/></svg>
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:36px;font-weight:600;color:#FDE3CC">ไฮไลต์ที่รอไม่ไหว</p>
-<h1 style="font-family:'Mali', Tahoma, sans-serif;font-size:120px;font-weight:700;line-height:1.4;color:#FFF6EC">ใบไม้แดง<br>ใต้แสงไฟ</h1>
-<p style="font-size:44px;color:#FFF6EC">คืนวันที่ 4 · ไฟประดับวัดเอคันโด เกียวโต</p>
-<p style="font-size:32px;color:#FDE3CC">มุมนี้แหละที่อยากถ่ายรูปคู่กับคิตตี้ที่สุด 📸</p>
-<aside>ช่วงฤดูใบไม้แดง วัดเอคันโดเปิดไฟประดับตอนกลางคืน สวยมาก คิวยาวหน่อย แต่คุ้มแน่นอน</aside>
+
+<section class="alt food">
+  <div class="wrap">
+    <p class="eyebrow">ภารกิจกินให้อ้วน 😋</p>
+    <h2>ของอร่อยที่ต้องไปกิน</h2>
+    <div class="grid3">
+      <div class="card"><div class="head"><b>🐙</b><h3>โอซาก้า</h3></div><ul><li>ทาโกะยากิ โดทงโบริ</li><li>โอโคโนมิยากิ ร้าน Mizuno</li><li>คุชิคัตสึ ร้าน Daruma</li><li>ตลาดคุโรมง</li></ul></div>
+      <div class="card"><div class="head"><b>⛩️</b><h3>เกียวโต</h3></div><ul><li>ยุโดฟุ ร้าน Okutan</li><li>ขนมยัตสึฮาชิ</li><li>เดินกินตลาดนิชิกิ</li><li>ไคเซกิมื้อพิเศษที่กิออน</li></ul></div>
+      <div class="card"><div class="head"><b>🍵</b><h3>อูจิ</h3></div><ul><li>มัทฉะ Nakamura Tokichi</li><li>พาร์เฟต์มัทฉะ</li><li>โซบะชาเขียว</li><li>ไอติมมัทฉะเข้ม ๆ</li></ul></div>
+    </div>
+  </div>
 </section>
-<section id="food" data-transition="fade" style="background:#FDE8D7;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">ภารกิจกินให้อ้วน 😋</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">ของอร่อยที่ต้องไปกิน</h2>
-</div>
-<div style="display:flex;gap:32px">
-<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:44px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<div style="display:flex;gap:16px;align-items:center">
-<p style="font-size:64px">🐙</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">โอซาก้า</h3>
-</div>
-<ul style="font-size:30px;line-height:1.6;color:#4A2C2A">
-<li>ทาโกะยากิ โดทงโบริ</li>
-<li>โอโคโนมิยากิ ร้าน Mizuno</li>
-<li>คุชิคัตสึ ร้าน Daruma</li>
-<li>ตลาดคุโรมง</li>
-</ul>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:44px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<div style="display:flex;gap:16px;align-items:center">
-<p style="font-size:64px">🍵</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">เกียวโต</h3>
-</div>
-<ul style="font-size:30px;line-height:1.6;color:#4A2C2A">
-<li>ยุโดฟุ ร้าน Okutan</li>
-<li>ขนมยัตสึฮาชิ</li>
-<li>เดินกินตลาดนิชิกิ</li>
-<li>ไคเซกิมื้อพิเศษที่กิออน</li>
-</ul>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:44px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<div style="display:flex;gap:16px;align-items:center">
-<p style="font-size:64px">🍵</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">อูจิ</h3>
-</div>
-<ul style="font-size:30px;line-height:1.6;color:#4A2C2A">
-<li>มัทฉะ Nakamura Tokichi</li>
-<li>พาร์เฟต์มัทฉะ</li>
-<li>โซบะชาเขียว</li>
-<li>ไอติมมัทฉะเข้ม ๆ</li>
-</ul>
-</div>
-</div>
-<aside>มื้อไคเซกิแนะนำไปมื้อกลางวัน ถูกกว่ามื้อเย็นเยอะ แต่คืนพิเศษจะจัดมื้อเย็นให้</aside>
+
+<section class="stay">
+  <div class="wrap">
+    <p class="eyebrow">บ้านของเราที่ญี่ปุ่น 🏨</p>
+    <h2>ที่พัก คืนละ 2,000–3,000 บาท</h2>
+    <div class="grid2">
+      <div class="card"><div class="head"><h3>🐙 โอซาก้า · 2 คืน</h3></div><p>แถวนัมบะ / ชินไซบาชิ เดินไปโดทงโบริได้</p><ul><li>Hotel Keihan Namba Grande</li><li>Daiwa Roynet Hotel</li><li>Sotetsu Fresa Inn</li></ul></div>
+      <div class="card"><div class="head"><h3>⛩️ เกียวโต · 5 คืน</h3></div><p>แถวชิโจ–คาวาระมาจิ หรือหน้าสถานีเกียวโต</p><ul><li>Sotetsu Fresa Inn / Super Hotel</li><li>Hotel Vista Premio Kyoto</li><li>MIMARU (ห้องกว้าง มีครัว)</li></ul></div>
+    </div>
+    <div class="tip"><span>💡</span><p><b>เกียวโตช่วงนี้แพง</b> ถ้าเกินงบ นอนโอซาก้าทั้งทริปแล้วนั่งรถไฟฮันคิว 45 นาทีไปเกียวโตได้ · จองต้นปีแบบยกเลิกฟรี</p></div>
+  </div>
 </section>
-<section id="stay" data-transition="fade" style="background:#FFF6EC;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:44px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">บ้านของเราที่ญี่ปุ่น 🏨</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">ที่พัก คืนละ 2,000–3,000 บาท</h2>
-</div>
-<div style="display:flex;gap:32px">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:44px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">🐙 โอซาก้า · 2 คืน</h3>
-<p style="font-size:28px;color:#6B4A43">แถวนัมบะ / ชินไซบาชิ เดินไปโดทงโบริได้</p>
-<ul style="font-size:30px;line-height:1.6;color:#4A2C2A">
-<li>Hotel Keihan Namba Grande</li>
-<li>Daiwa Roynet Hotel</li>
-<li>Sotetsu Fresa Inn</li>
-</ul>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:44px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:44px;font-weight:700;color:#C8432A">⛩️ เกียวโต · 5 คืน</h3>
-<p style="font-size:28px;color:#6B4A43">แถวชิโจ–คาวาระมาจิ หรือหน้าสถานีเกียวโต</p>
-<ul style="font-size:30px;line-height:1.6;color:#4A2C2A">
-<li>Sotetsu Fresa Inn / Super Hotel</li>
-<li>Hotel Vista Premio Kyoto</li>
-<li>MIMARU (ห้องกว้าง มีครัว)</li>
-</ul>
-</div>
-</div>
-<div style="display:flex;gap:20px;align-items:center;background:#F2A541;padding:28px 40px;border-radius:32px">
-<p style="font-size:48px">💡</p>
-<p style="font-size:30px;line-height:1.4;color:#4A2C2A"><b>เกียวโตช่วงนี้แพง</b> ถ้าเกินงบ นอนโอซาก้าทั้งทริปแล้วนั่งรถไฟฮันคิว 45 นาทีไปเกียวโตได้ · จองต้นปีแบบยกเลิกฟรี</p>
-</div>
-<aside>ราคาประมาณต่อห้องต่อคืน ประมาณ 9,000–13,000 เยน ควรจองช่วงมกรา–มีนา 2027 เลือกแบบยกเลิกฟรีไว้ก่อน</aside>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="eyebrow">บินไปด้วยกัน ✈️</p>
+    <h2>กรุงเทพฯ → โอซาก้า ประมาณ 6 ชม.</h2>
+    <div class="card">
+      <table>
+        <tr><th>สายการบิน</th><th>แบบไหน</th><th class="num">ไป-กลับ / คน</th></tr>
+        <tr><td>Thai Airways 💜</td><td>รวมกระเป๋า สบาย ๆ</td><td class="num">18,000–28,000</td></tr>
+        <tr><td>Thai AirAsia X</td><td>โลว์คอสต์ (ดอนเมือง)</td><td class="num">9,000–16,000</td></tr>
+        <tr><td>Thai VietJet / Peach</td><td>โลว์คอสต์</td><td class="num">9,000–15,000</td></tr>
+      </table>
+    </div>
+    <div class="chips"><span>🌙 บินกลางคืน ถึงเช้า ได้เที่ยวเพิ่ม</span><span>🎯 จองตอนมีโปร 4–6 เดือนก่อนไป</span></div>
+    <p class="small">* ราคาประมาณการจากช่วงเดียวกันปีก่อน ๆ โลว์คอสต์ยังไม่รวมกระเป๋า</p>
+  </div>
 </section>
-<section id="flights" data-transition="fade" style="background:#FDE8D7;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">บินไปด้วยกัน ✈️</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">กรุงเทพฯ → โอซาก้า ประมาณ 6 ชม.</h2>
-</div>
-<div style="background:#FFFDF8;padding:24px 40px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<table style="font-size:32px;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif">
-<tr><th style="width:38%;text-align:left">สายการบิน</th><th style="width:32%;text-align:left">แบบไหน</th><th style="width:30%;text-align:right">ไป-กลับ / คน</th></tr>
-<tr><td>Thai Airways 💜</td><td>รวมกระเป๋า สบาย ๆ</td><td style="text-align:right">18,000–28,000</td></tr>
-<tr><td>Thai AirAsia X</td><td>โลว์คอสต์ (ดอนเมือง)</td><td style="text-align:right">9,000–16,000</td></tr>
-<tr><td>Thai VietJet / Peach</td><td>โลว์คอสต์</td><td style="text-align:right">9,000–15,000</td></tr>
-</table>
-</div>
-<div style="display:flex;gap:24px">
-<p style="font-size:28px;font-weight:500;background:#FFFDF8;color:#4A2C2A;padding:16px 32px;border-radius:999px">🌙 บินกลางคืน ถึงเช้า ได้เที่ยวเพิ่ม</p>
-<p style="font-size:28px;font-weight:500;background:#FFFDF8;color:#4A2C2A;padding:16px 32px;border-radius:999px">🎯 จองตอนมีโปร 4–6 เดือนก่อนไป</p>
-</div>
-<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B4A43">* ราคาประมาณการจากช่วงเดียวกันปีก่อน ๆ โลว์คอสต์ยังไม่รวมกระเป๋า</p>
-<aside>โลว์คอสต์ถูกกว่าแต่ต้องซื้อน้ำหนักกระเป๋าเพิ่ม ขากลับน่าจะมีของฝากเยอะ ลองเทียบราคารวมดูอีกที</aside>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">กระปุกออมสินของเรา 🐷</p>
+    <h2>งบประมาณสำหรับเราสองคน</h2>
+    <div class="budget">
+      <div class="big"><span>รวมประมาณ</span><b><span class="countup" data-to="90">90</span>k–<span class="countup" data-to="130">130</span>k</b><span>บาท · 2 คน · 8 วัน</span></div>
+      <div class="card">
+        <table>
+          <tr><th>รายการ</th><th class="num">บาท</th></tr>
+          <tr><td>✈️ ตั๋วเครื่องบิน</td><td class="num">20,000–50,000</td></tr>
+          <tr><td>🏨 ที่พัก 7 คืน</td><td class="num">15,000–21,000</td></tr>
+          <tr><td>🍜 อาหาร</td><td class="num">24,000–32,000</td></tr>
+          <tr><td>🚃 ค่าเดินทาง</td><td class="num">6,000–8,000</td></tr>
+          <tr><td>🎁 วัด ช้อป ของฝาก</td><td class="num">15,000–20,000</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
 </section>
-<section id="budget" data-transition="fade" style="background:#FFF6EC;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">กระปุกออมสินของเรา 🐷</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">งบประมาณสำหรับเราสองคน</h2>
-</div>
-<div style="display:flex;gap:48px;align-items:center">
-<div style="width:620px;display:flex;flex-direction:column;align-items:center;gap:8px;background:#C8432A;padding:64px 40px;border-radius:48px">
-<p style="font-size:30px;color:#FDE3CC">รวมประมาณ</p>
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:96px;font-weight:700;color:#FFF6EC">90k–130k</p>
-<p style="font-size:32px;color:#FFF6EC">บาท · 2 คน · 8 วัน</p>
-</div>
-<div style="flex:1;background:#FFFDF8;padding:24px 40px;border-radius:40px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<table style="font-size:30px;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif">
-<tr><th style="width:55%;text-align:left">รายการ</th><th style="width:45%;text-align:right">บาท</th></tr>
-<tr><td>✈️ ตั๋วเครื่องบิน</td><td style="text-align:right">20,000–50,000</td></tr>
-<tr><td>🏨 ที่พัก 7 คืน</td><td style="text-align:right">15,000–21,000</td></tr>
-<tr><td>🍜 อาหาร</td><td style="text-align:right">24,000–32,000</td></tr>
-<tr><td>🚃 ค่าเดินทาง</td><td style="text-align:right">6,000–8,000</td></tr>
-<tr><td>🎁 วัด ช้อป ของฝาก</td><td style="text-align:right">15,000–20,000</td></tr>
-</table>
-</div>
-</div>
-<aside>ถ้าเลือกโลว์คอสต์และนอนโอซาก้าทั้งทริป จะอยู่แถว ๆ 90k ถ้าบินการบินไทยและจัดเต็มก็ประมาณ 130k</aside>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="eyebrow">เช็กลิสต์ของเรา ✅</p>
+    <h2>เตรียมตัวกันทีละขั้น</h2>
+    <div class="steps">
+      <div class="card"><span class="pill">ม.ค.–มี.ค.</span><div class="emoji">🏨</div><h3>จองที่พัก</h3><p>เลือกแบบยกเลิกฟรี เผื่อขยับวัน</p></div>
+      <div class="card"><span class="pill">มิ.ย.–ก.ค.</span><div class="emoji">✈️</div><h3>จองตั๋ว</h3><p>รอโปรสายการบิน แล้วกดพร้อมกัน</p></div>
+      <div class="card"><span class="pill">ก.ย.–ต.ค.</span><div class="emoji">🍁</div><h3>ดูพยากรณ์</h3><p>เช็กว่าใบไม้แดงตอนไหน ปรับวันได้</p></div>
+      <div class="card"><span class="pill">พ.ย.</span><div class="emoji">🧳</div><h3>แพ็กกระเป๋า</h3><p>โค้ท ผ้าพันคอ รองเท้าเดินสบาย</p></div>
+    </div>
+  </div>
 </section>
-<section id="todo" data-transition="fade" style="background:#FDE8D7;color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
-<div style="display:flex;flex-direction:column;gap:12px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:30px;font-weight:600;color:#B83A22">เช็กลิสต์ของเรา ✅</p>
-<h2 style="font-family:'Mali', Tahoma, sans-serif;font-size:72px;font-weight:700;color:#4A2C2A">เตรียมตัวกันทีละขั้น</h2>
-</div>
-<div style="display:flex;gap:28px">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:40px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#C8432A;color:#FFF6EC;padding:8px 20px;border-radius:999px;align-self:start">ม.ค.–มี.ค.</p>
-<p style="font-size:64px">🏨</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:36px;font-weight:700;color:#4A2C2A">จองที่พัก</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">เลือกแบบยกเลิกฟรี เผื่อขยับวัน</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:40px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#C8432A;color:#FFF6EC;padding:8px 20px;border-radius:999px;align-self:start">มิ.ย.–ก.ค.</p>
-<p style="font-size:64px">✈️</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:36px;font-weight:700;color:#4A2C2A">จองตั๋ว</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">รอโปรสายการบิน แล้วกดพร้อมกัน</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:40px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#C8432A;color:#FFF6EC;padding:8px 20px;border-radius:999px;align-self:start">ก.ย.–ต.ค.</p>
-<p style="font-size:64px">🍁</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:36px;font-weight:700;color:#4A2C2A">ดูพยากรณ์</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">เช็กว่าใบไม้แดงตอนไหน ปรับวันได้</p>
-</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFDF8;padding:40px;border-radius:36px;box-shadow:0 10px 28px rgba(200,67,42,0.12)">
-<p style="font-size:26px;font-weight:600;background:#C8432A;color:#FFF6EC;padding:8px 20px;border-radius:999px;align-self:start">พ.ย.</p>
-<p style="font-size:64px">🧳</p>
-<h3 style="font-family:'Mali', Tahoma, sans-serif;font-size:36px;font-weight:700;color:#4A2C2A">แพ็กกระเป๋า</h3>
-<p style="font-size:28px;line-height:1.5;color:#6B4A43">โค้ท ผ้าพันคอ รองเท้าเดินสบาย</p>
-</div>
-</div>
-<aside>จองที่พักก่อนเพราะเกียวโตเต็มเร็ว ตั๋วเครื่องบินรอโปรได้ ช่วงกันยา–ตุลา ดูพยากรณ์ใบไม้แดงแล้วค่อยปรับวันถ้าจำเป็น</aside>
+
+<section class="ask">
+  <div class="wrap">
+    <h2>ไปด้วยกันนะ<br><span>คิตตี้</span> 🥺</h2>
+    <div class="btns">
+      <button class="yes" type="button">ไป!</button>
+      <button class="yes2" type="button">ไปแน่นอน!</button>
+    </div>
+    <p class="hint">(ไม่มีปุ่มไม่ไปนะ 😝)</p>
+    <p class="answer" id="answer" aria-live="polite"></p>
+  </div>
 </section>
-<section id="ask" data-transition="fade" style="background:radial-gradient(circle at 50% 40%, #FDE3CC, #FFF6EC 65%);color:#4A2C2A;font-family:'Prompt', Tahoma, sans-serif;padding:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px">
-<p style="position:absolute;left:220px;top:160px;width:160px;font-size:120px;transform:rotate(-18deg)" data-build-in="pop">🍁</p>
-<p style="position:absolute;right:220px;top:200px;width:140px;font-size:100px;transform:rotate(20deg)" data-build-in="pop">🍂</p>
-<p style="position:absolute;right:300px;bottom:150px;width:140px;font-size:100px;transform:rotate(-10deg)" data-build-in="pop">💕</p>
-<h1 style="font-family:'Mali', Tahoma, sans-serif;font-size:120px;font-weight:700;line-height:1.4;color:#4A2C2A;text-align:center">ไปด้วยกันนะ<br><span style="color:#C8432A">คิตตี้</span> 🥺</h1>
-<div style="display:flex;gap:40px">
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:48px;font-weight:700;background:#C8432A;color:#FFF6EC;padding:24px 72px;border-radius:999px;box-shadow:0 12px 28px rgba(200,67,42,0.3)">ไป!</p>
-<p style="font-family:'Mali', Tahoma, sans-serif;font-size:48px;font-weight:700;background:#F2A541;color:#4A2C2A;padding:24px 72px;border-radius:999px;box-shadow:0 12px 28px rgba(242,165,65,0.3)">ไปแน่นอน!</p>
-</div>
-<p style="font-size:32px;color:#6B4A43">(ไม่มีปุ่มไม่ไปนะ 😝)</p>
-<aside>มีให้เลือกแค่สองปุ่ม ไป กับ ไปแน่นอน รักนะ</aside>
-</section>
-</div></div>
-<div class="nav">
-  <button id="prev" aria-label="สไลด์ก่อนหน้า">‹ ก่อนหน้า</button>
-  <span class="count" id="count"></span>
-  <button class="main" id="next" aria-label="สไลด์ถัดไป">ถัดไป ›</button>
-</div>
-<p class="tip">ปัดซ้าย–ขวา หรือกดลูกศรบนคีย์บอร์ดก็ได้นะ</p>
+
 <script>
-  const stage = document.getElementById('stage');
-  const deck = document.getElementById('deck');
-  const slides = [...deck.children].filter(el => el.tagName === 'SECTION');
-  let i = 0;
-  function fit() { deck.style.transform = 'scale(' + stage.clientWidth / 1920 + ')'; }
-  function show(n) {
-    i = Math.max(0, Math.min(slides.length - 1, n));
-    slides.forEach((s, k) => s.classList.toggle('on', k === i));
-    document.getElementById('count').textContent = (i + 1) + ' / ' + slides.length;
-    document.getElementById('prev').disabled = i === 0;
-    document.getElementById('next').disabled = i === slides.length - 1;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const leaves = ['🍁', '🍂', '🧡', '💕'];
+
+  // scroll progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = 'scaleX(' + (max > 0 ? scrollY / max : 0) + ')';
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // leaves drifting down the hero
+  const hero = document.querySelector('.hero');
+  function dropLeaf() {
+    const el = document.createElement('span');
+    el.className = 'drift';
+    el.textContent = Math.random() < .7 ? '🍁' : '🍂';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.fontSize = (16 + Math.random() * 22) + 'px';
+    el.style.animationDuration = (5 + Math.random() * 4) + 's';
+    hero.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
   }
-  document.getElementById('prev').onclick = () => show(i - 1);
-  document.getElementById('next').onclick = () => show(i + 1);
-  addEventListener('keydown', e => { if (e.key === 'ArrowLeft') show(i - 1); if (e.key === 'ArrowRight') show(i + 1); });
-  let x0 = null;
-  stage.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-  stage.addEventListener('touchend', e => {
-    if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
-    x0 = null;
+  if (!calm) setInterval(() => { if (scrollY < hero.offsetHeight) dropLeaf(); }, 450);
+
+  // reveal on scroll, staggered within each group
+  const targets = document.querySelectorAll('section:not(.hero) .eyebrow, section:not(.hero) h2, .card, .stop, .big, .tip, .chips, .night svg, .note');
+  targets.forEach(el => {
+    el.classList.add('reveal');
+    const sibs = [...el.parentElement.children].filter(c => c.matches('.card, .stop'));
+    const i = sibs.indexOf(el);
+    if (i > 0) el.style.setProperty('--d', (i % 4) * 0.12 + 's');
   });
-  addEventListener('resize', fit);
-  fit(); show(0);
+  const countUp = el => {
+    const to = +el.dataset.to, t0 = performance.now();
+    const step = t => {
+      const p = Math.min(1, (t - t0) / 1200);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    if (!calm) e.target.querySelectorAll('.countup').forEach(countUp);
+    io.unobserve(e.target);
+  }), { threshold: .15 });
+  targets.forEach(el => io.observe(el));
+
+  // the big yes
+  function burstFrom(btn) {
+    const r = btn.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    for (let k = 0; k < 18; k++) {
+      const el = document.createElement('span');
+      el.className = 'burst';
+      el.textContent = leaves[k % leaves.length];
+      const a = (k / 18) * Math.PI * 2, d = 90 + Math.random() * 90;
+      el.style.left = cx + 'px';
+      el.style.top = cy + 'px';
+      el.style.setProperty('--x', Math.cos(a) * d + 'px');
+      el.style.setProperty('--y', Math.sin(a) * d + 'px');
+      el.style.setProperty('--r', (Math.random() * 360 - 180) + 'deg');
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+  document.querySelectorAll('.ask button').forEach(btn => btn.addEventListener('click', () => {
+    const ans = document.getElementById('answer');
+    ans.textContent = 'เย้! เจอกันที่ญี่ปุ่นนะ 🧡';
+    ans.classList.remove('show'); void ans.offsetWidth; ans.classList.add('show');
+    if (calm) return;
+    if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+    burstFrom(btn);
+    const h = document.querySelector('.ask h2');
+    h.classList.remove('shake'); void h.offsetWidth; h.classList.add('shake');
+    for (let k = 0; k < 30; k++) {
+      const el = document.createElement('span');
+      el.className = 'fall';
+      el.textContent = leaves[k % leaves.length];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+      el.style.animationDelay = Math.random() * .8 + 's';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }));
 </script>
 </body>
 </html>
