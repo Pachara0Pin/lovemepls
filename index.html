@@ -44,6 +44,16 @@
     box-shadow: 0 8px 24px rgba(255, 92, 138, .12);
     margin-bottom: 16px;
   }
+  .trip-link {
+    display: block; width: fit-content; margin: 8px auto 16px;
+    padding: 10px 22px; border-radius: 99px;
+    text-align: center; text-decoration: none;
+    font-size: 1rem; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, #ff9a5c, #e0613f);
+    box-shadow: 0 8px 24px rgba(224, 97, 63, .25);
+    transition: transform .1s;
+  }
+  .trip-link:active { transform: scale(.97); }
   .count { text-align: center; }
   .count b { font-size: 3rem; color: var(--pink); }
   .count span { color: var(--muted); }
@@ -589,6 +599,8 @@
     <h2>Heart history</h2>
     <ul class="log" id="log"></ul>
   </section>
+
+  <a class="card trip-link" href="japan.html">ไปญี่ปุ่นกันมั้ย 🧡</a>
 </main>
 
 <div class="win" id="win">
