@@ -6,6 +6,14 @@
 <title>ไปญี่ปุ่นกันมั้ย 🧡</title>
 <link rel="icon" type="image/png" href="icon-192.png">
 <meta name="theme-color" content="#fff6ec">
+<script>
+  // Opens only after 25 hearts (same as TRIP_AT in index.html); uses the heart list index.html caches.
+  (function () {
+    let hearts = 0;
+    try { hearts = (JSON.parse(localStorage.getItem("lovemepls-hearts")) || []).reduce((s, g) => s + g.n, 0); } catch (e) {}
+    if (hearts < 25) location.replace("index.html");
+  })();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {

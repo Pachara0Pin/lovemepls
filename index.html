@@ -54,6 +54,10 @@
     transition: transform .1s;
   }
   .trip-link:active { transform: scale(.97); }
+  .trip-link.locked { background: var(--empty); color: var(--muted); box-shadow: none; font-weight: 600; cursor: default; }
+  .trip-link.locked:active { transform: none; }
+  .trip-link.locked.nope { animation: nope .4s; }
+  @keyframes nope { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
   .count { text-align: center; }
   .count b { font-size: 3rem; color: var(--pink); }
   .count span { color: var(--muted); }
@@ -600,7 +604,7 @@
     <ul class="log" id="log"></ul>
   </section>
 
-  <a class="card trip-link" href="japan.html">ไปญี่ปุ่นกันมั้ย 🧡</a>
+  <a class="card trip-link" id="tripLink" href="japan.html">ไปญี่ปุ่นกันมั้ย 🧡</a>
 </main>
 
 <div class="win" id="win">
@@ -687,6 +691,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
   const GOAL = 100;
+  const TRIP_AT = 25; // hearts needed before the Japan trip page opens (japan.html checks this too)
   const RESET_CODE = "19930726";
   const KEY = "lovemepls-hearts";
   const HEART = "M12 21s-7.5-4.6-9.6-9.2C.9 8.6 2.8 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.8 0 5.7 4.1 4.2 7.3C19.5 16.4 12 21 12 21z";
@@ -735,10 +740,23 @@
     document.querySelectorAll("[data-add], #addCustom").forEach((b) => (b.disabled = full));
     $("undo").disabled = !gifts.length;
     $("take").disabled = t <= 0;
+    const tripLocked = t < TRIP_AT;
+    $("tripLink").classList.toggle("locked", tripLocked);
+    $("tripLink").setAttribute("aria-disabled", tripLocked);
+    $("tripLink").textContent = tripLocked
+      ? `🔒 ไปญี่ปุ่นกันมั้ย · อีก ${fmt(TRIP_AT - t)} หัวใจ`
+      : "ไปญี่ปุ่นกันมั้ย 🧡";
     renderCoupons();
     wear(outfit); // refresh outfit locks
     if (!moodHeld) setMood();
   }
+
+  $("tripLink").addEventListener("click", (e) => {
+    if (total() >= TRIP_AT) return;
+    e.preventDefault();
+    const link = $("tripLink");
+    link.classList.remove("nope"); void link.offsetWidth; link.classList.add("nope");
+  });
 
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
   const HAPPY_LINES = ["Yay! Thank you, Kitty! 💕", "My heart is so full! 🥰", "Best. Day. Ever!", "Hehe, one step closer 😝"];
