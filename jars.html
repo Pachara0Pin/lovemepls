@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>โหลใจ 🫙</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="theme-color" content="#fff5f8">
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff5f8;
+    --card: #ffffff;
+    --pink: #ff5c8a;
+    --pink-soft: #ffd1de;
+    --text: #4a2b36;
+    --muted: #a27d89;
+    --empty: #f3e3e8;
+    --james: #5b7fe0;
+    --james-soft: #dde6ff;
+    --kitty: #ff5c8a;
+    --kitty-soft: #ffd1de;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+    font-family: "Mali", system-ui, sans-serif;
+    display: flex; justify-content: center; padding: 16px 16px 48px;
+  }
+  main { width: 100%; max-width: 520px; }
+  button {
+    font: inherit; font-weight: 600; border: none; border-radius: 16px;
+    padding: 12px 14px; background: var(--pink-soft); color: var(--text);
+    cursor: pointer; transition: transform .1s;
+  }
+  button:active { transform: scale(.96); }
+  button.main { background: var(--pink); color: #fff; }
+  button.quiet { background: none; color: var(--muted); font-weight: 400; }
+  button:disabled { opacity: .45; cursor: default; }
+  .card { background: var(--card); border-radius: 24px; padding: 20px; box-shadow: 0 8px 24px rgba(255, 92, 138, .12); margin-bottom: 16px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .top a { color: var(--text); text-decoration: none; font-weight: 600; background: var(--pink-soft); padding: 6px 14px; border-radius: 99px; font-size: .9rem; }
+  .top .me { padding: 6px 12px; border-radius: 99px; font-size: .85rem; background: var(--card); box-shadow: 0 4px 12px rgba(255, 92, 138, .12); }
+  h1 { text-align: center; font-size: 1.5rem; margin: 4px 0 2px; }
+  .sub { text-align: center; color: var(--muted); margin: 0 0 16px; font-size: .9rem; }
+  .sync { text-align: center; color: var(--muted); font-size: .75rem; min-height: 1em; margin-top: 6px; }
+
+  /* ---- the two jars ---- */
+  .shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 12px 16px; }
+  .side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .side.james { --c: var(--james); --soft: var(--james-soft); }
+  .side.kitty { --c: var(--kitty); --soft: var(--kitty-soft); }
+  .heart-btn, .jar-btn { background: none; padding: 0; border-radius: 20px; width: 100%; -webkit-tap-highlight-color: transparent; }
+  .heart-btn { width: 72%; position: relative; }
+  .heart-btn svg, .jar-btn svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .heart-btn .count {
+    position: absolute; inset: 0 0 12% 0; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.7rem; font-weight: 700; text-shadow: 0 1px 4px rgba(0, 0, 0, .15); pointer-events: none;
+  }
+  .heart-btn.zero .count { color: var(--muted); text-shadow: none; font-size: 1.3rem; }
+  .heart-btn:not(.zero) svg { animation: beat 1.8s ease-in-out infinite; }
+  .heart-btn.bump svg { animation: bump .7s ease; }
+  .side .label { font-weight: 700; font-size: 1rem; }
+  .side .hint { color: var(--muted); font-size: .75rem; text-align: center; min-height: 2.4em; line-height: 1.2; }
+  .jar-btn.shake svg { animation: shake .5s ease; }
+  .slip { transform-box: fill-box; transform-origin: center; }
+  .slip.new { animation: drop .7s cubic-bezier(.3, 1.4, .5, 1); }
+  .slip.mine-to-read { animation: wiggle 2.4s ease-in-out infinite; }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.06); } 24% { transform: scale(.98); } 36% { transform: scale(1.04); } }
+  @keyframes bump { 40% { transform: scale(1.25); } }
+  @keyframes shake { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+  @keyframes drop { from { transform: translateY(-90px) rotate(-30deg); opacity: 0; } }
+  @keyframes wiggle { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-12deg); } 92% { transform: rotate(10deg); } }
+
+  .how { font-size: .85rem; color: var(--muted); margin: 0; padding-left: 20px; line-height: 1.7; }
+  .how b { color: var(--text); }
+
+  /* ---- sheet (jar list / heart list / one note) ---- */
+  .win {
+    position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center;
+    background: rgba(74, 43, 54, .35); z-index: 10; padding: 16px 12px 0;
+  }
+  .win.show { display: flex; }
+  .sheet {
+    width: 100%; max-width: 520px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+    overflow-y: auto; background: var(--card); border-radius: 24px 24px 0 0; padding: 20px 18px 28px;
+    animation: rise .3s ease; -webkit-overflow-scrolling: touch;
+  }
+  .sheet.james { --c: var(--james); --soft: var(--james-soft); }
+  .sheet.kitty { --c: var(--kitty); --soft: var(--kitty-soft); }
+  @keyframes rise { from { transform: translateY(60px); opacity: 0; } }
+  .sheet-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .sheet-head h2 { flex: 1; margin: 0; font-size: 1.15rem; }
+  .sheet-head button { padding: 6px 12px; background: var(--empty); font-size: .9rem; }
+  .sheet .lead { color: var(--muted); font-size: .85rem; margin: 0 0 14px; }
+
+  .compose { border: 2px dashed var(--soft); border-radius: 18px; padding: 12px; margin-bottom: 14px; }
+  .kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+  .kinds button { padding: 8px; font-size: .85rem; font-weight: 400; background: var(--empty); }
+  .kinds button.on { background: var(--c); color: #fff; font-weight: 600; }
+  textarea {
+    width: 100%; font: inherit; resize: vertical; border: 2px solid var(--soft); border-radius: 14px;
+    padding: 10px 12px; color: var(--text); background: #fff;
+  }
+  textarea:focus { outline: none; border-color: var(--c, var(--pink)); }
+  .compose .row, .reply { display: flex; gap: 8px; margin-top: 8px; align-items: flex-end; }
+  .compose .row button { margin-left: auto; background: var(--c); color: #fff; }
+  .reply textarea { flex: 1; min-width: 0; }
+  .reply button { background: var(--c); color: #fff; flex-shrink: 0; }
+
+  .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .item {
+    display: block; width: 100%; text-align: left; font-weight: 400; padding: 12px 14px;
+    background: var(--soft); border-radius: 16px; position: relative;
+  }
+  .item p { margin: 0 0 4px; overflow-wrap: anywhere; white-space: pre-wrap;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .item small { color: var(--muted); font-size: .75rem; }
+  .item .tag { font-size: .7rem; font-weight: 700; color: var(--c); background: #fff; padding: 1px 8px; border-radius: 99px; margin-right: 4px; }
+  .item.unread::after { content: "ใหม่"; position: absolute; top: -6px; right: 10px; background: var(--pink); color: #fff; font-size: .65rem; font-weight: 700; padding: 1px 8px; border-radius: 99px; }
+  .empty { color: var(--muted); text-align: center; font-size: .9rem; padding: 18px 0; }
+
+  .paper {
+    background: var(--soft); border-radius: 18px; padding: 16px; font-size: 1.05rem;
+    white-space: pre-wrap; overflow-wrap: anywhere; position: relative;
+  }
+  .paper.accepted { box-shadow: 0 0 0 3px var(--c); }
+  .meta { color: var(--muted); font-size: .75rem; margin: 6px 2px 14px; }
+  .thread-title { font-size: .9rem; margin: 0 0 8px; }
+  .thread { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+  .bubble { max-width: 85%; padding: 8px 12px; border-radius: 16px; font-size: .92rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .bubble small { display: block; font-size: .68rem; color: var(--muted); margin-top: 2px; white-space: normal; }
+  .bubble.james { background: var(--james-soft); }
+  .bubble.kitty { background: var(--kitty-soft); }
+  .bubble.mine { align-self: flex-end; border-bottom-right-radius: 4px; }
+  .bubble.theirs { align-self: flex-start; border-bottom-left-radius: 4px; }
+  .actions { display: grid; gap: 8px; margin-top: 16px; }
+  .actions .accept { background: var(--c); color: #fff; padding: 14px; font-size: 1.05rem; }
+  .note-hint { text-align: center; color: var(--muted); font-size: .8rem; margin: 0; }
+
+  /* who am I */
+  .who .card { text-align: center; margin: auto; width: 100%; max-width: 340px; animation: pop .4s ease; }
+  .who { align-items: center; padding: 16px; }
+  .who .pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .who .pick button { font-size: 1.05rem; padding: 18px 8px; }
+  .who .pick i { display: block; font-style: normal; font-size: 2.4rem; }
+  .who .pick .james { background: var(--james-soft); }
+  .who .pick .kitty { background: var(--kitty-soft); }
+  @keyframes pop { from { transform: scale(.7); opacity: 0; } }
+
+  .flyer { position: fixed; z-index: 30; font-size: 1.8rem; pointer-events: none; }
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 40;
+    background: var(--text); color: #fff; padding: 10px 18px; border-radius: 99px; font-size: .9rem;
+    animation: pop .3s ease; max-width: calc(100% - 32px); text-align: center;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <a href="index.html">‹ หัวใจ</a>
+    <button class="me" id="meBtn"></button>
+  </div>
+  <h1>โหลใจ 🫙</h1>
+  <p class="sub">ใส่ความรู้สึก หรือสิ่งที่อยากได้จากอีกฝ่าย ลงในโหลของตัวเอง</p>
+
+  <section class="card shelf" id="shelf"></section>
+
+  <section class="card">
+    <ol class="how">
+      <li><b>ใส่ลงโหลของตัวเอง</b> — ความรู้สึก 💭 หรือสิ่งที่อยากได้ 🎁</li>
+      <li><b>อีกฝ่ายเปิดอ่าน</b> แล้วคุยกันในคอมเมนต์จนเข้าใจ</li>
+      <li>เข้าใจแล้วกด <b>ยอมรับ 💗</b> — กระดาษจะลอยเข้าไปอยู่ในหัวใจ</li>
+      <li>แตะ <b>หัวใจ</b> เพื่ออ่านด้วยกันว่าเรายอมรับอะไรกันไปแล้วบ้าง</li>
+    </ol>
+    <div class="sync" id="sync"></div>
+  </section>
+</main>
+
+<div class="win" id="sheetBox"><div class="sheet" id="sheet"></div></div>
+
+<div class="win who" id="whoBox">
+  <div class="card">
+    <div style="font-size:3rem">🫙</div>
+    <h2 style="margin:4px 0">ใครกำลังใช้อยู่น้า?</h2>
+    <p class="sub" style="margin:0">เลือกครั้งเดียว เครื่องนี้จะจำไว้</p>
+    <div class="pick">
+      <button class="james" data-me="james"><i>🐻</i>เจมส์</button>
+      <button class="kitty" data-me="kitty"><i>🐱</i>คิตตี้</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL = "https://lelufonkscrioecwmrfm.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_VWysRxe-FcaDqQSYzF2I5g_hsP9mUgQ"; // public key — same as index.html
+  const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+  const PEOPLE = {
+    james: { name: "เจมส์", icon: "🐻" },
+    kitty: { name: "คิตตี้", icon: "🐱" },
+  };
+  const KINDS = { feel: ["💭", "ความรู้สึก"], wish: ["🎁", "อยากได้"] };
+  const ME_KEY = "lovemepls-me";
+  const SEEN_KEY = "lovemepls-jar-seen";
+  const CACHE_KEY = "lovemepls-jars";
+  const HEART = "M12 21s-7.5-4.6-9.6-9.2C.9 8.6 2.8 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.8 0 5.7 4.1 4.2 7.3C19.5 16.4 12 21 12 21z";
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const other = (p) => (p === "james" ? "kitty" : "james");
+  const when = (t) => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
+
+  let me = load(ME_KEY, null);
+  let notes = [], comments = [];
+  ({ notes = [], comments = [] } = load(CACHE_KEY, {}));
+  let seen = load(SEEN_KEY, {}); // note id -> comment count when I last opened it
+  let view = null;               // { type: "jar"|"heart", owner } or { type: "note", id, back }
+  let kind = "feel";
+  let drafts = {};               // unsent text, kept across re-renders
+  let busy = 0;                  // our own writes in flight
+  let fresh = new Set();         // slips that just landed, for the drop animation
+
+  const pending = (o) => notes.filter((n) => n.owner === o && !n.accepted_at);
+  const accepted = (o) => notes.filter((n) => n.owner === o && n.accepted_at)
+    .sort((a, b) => Date.parse(b.accepted_at) - Date.parse(a.accepted_at));
+  const commentsOf = (id) => comments.filter((c) => c.note_id === id);
+  const unread = (n) => commentsOf(n.id).some((c) => c.author !== me) && (seen[n.id] ?? -1) < commentsOf(n.id).length
+    || (n.owner !== me && !n.accepted_at && seen[n.id] === undefined);
+
+  function setStatus(t) { $("sync").textContent = t; }
+  function toast(t) {
+    const el = document.createElement("div");
+    el.className = "toast"; el.textContent = t;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  // ---------- drawing ----------
+  function heartSvg(owner, n) {
+    const c = `var(--${owner})`;
+    return `<svg viewBox="0 0 24 22"><path d="${HEART}" transform="translate(0 -2)" fill="${n ? c : "var(--empty)"}" stroke="${n ? c : "var(--soft)"}" stroke-width=".6"/>
+      ${n ? `<path d="M6.4 6.6c-1.6.2-2.6 1.7-2.4 3.3" transform="translate(0 -2)" stroke="#fff" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/>` : ""}</svg>`;
+  }
+
+  // stable little "random" numbers per note so slips don't jump around between renders
+  const rand = (id, k) => { const x = Math.sin(id * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+
+  function jarSvg(owner, list) {
+    const shown = list.slice(-18); // newest on top
+    const slips = shown.map((n, i) => {
+      const row = Math.floor(i / 3), col = i % 3;
+      const x = 44 + col * 36 + rand(n.id, 1) * 8;
+      const y = 180 - row * 22 - rand(n.id, 2) * 6;
+      const r = (rand(n.id, 3) - .5) * 70;
+      const wish = n.kind === "wish";
+      const cls = ["slip", fresh.has(n.id) && "new", owner !== me && seen[n.id] === undefined && "mine-to-read"].filter(Boolean).join(" ");
+      // position on the outer group: a CSS animation's transform would otherwise replace it
+      return `<g transform="translate(${x} ${y}) rotate(${r}) scale(1.5)"><g class="${cls}">
+        <rect x="-12" y="-7" width="24" height="14" rx="3" fill="${wish ? "#fff6d6" : "#fff"}" stroke="var(--c)" stroke-width="1.6"/>
+        <path d="M-7-1H7M-7 3H3" stroke="var(--soft)" stroke-width="1.6" stroke-linecap="round"/>
+        ${wish ? `<path d="M9-9l1.2 2.4 2.6.4-1.9 1.8.5 2.6L9-3l-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" fill="#f2b84b"/>` : ""}
+      </g></g>`;
+    }).join("");
+    return `<svg viewBox="0 0 160 210">
+      <defs><clipPath id="in-${owner}"><path d="M30 58Q22 64 22 80V184Q22 202 40 202H120Q138 202 138 184V80Q138 64 130 58Z"/></clipPath></defs>
+      <rect x="40" y="18" width="80" height="24" rx="8" fill="var(--c)"/>
+      <path d="M48 24H112" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+      <path d="M44 42H116V52Q132 56 136 68Q142 76 140 90V184Q140 204 120 204H40Q20 204 20 184V90Q18 76 24 68Q28 56 44 52Z"
+        fill="var(--soft)" fill-opacity=".35" stroke="var(--c)" stroke-width="4" stroke-linejoin="round"/>
+      <g clip-path="url(#in-${owner})">${slips}</g>
+      <path d="M32 84Q30 120 34 160" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".75"/>
+      ${list.length > shown.length ? `<text x="80" y="76" text-anchor="middle" font-size="12" fill="var(--c)" font-family="Mali">+${list.length - shown.length}</text>` : ""}
+    </svg>`;
+  }
+
+  function renderShelf() {
+    $("shelf").innerHTML = ["james", "kitty"].map((o) => {
+      const p = pending(o), a = accepted(o);
+      const toRead = o !== me ? p.filter((n) => seen[n.id] === undefined).length : 0;
+      const hint = !p.length ? (o === me ? "แตะโหลเพื่อใส่ความรู้สึก ✍️" : "ยังว่างอยู่")
+        : toRead ? `มี ${toRead} ใบที่ยังไม่ได้อ่าน 👀`
+        : `${p.length} ใบรอ${o === me ? PEOPLE[other(o)].name : "เรา"}ยอมรับ`;
+      return `<div class="side ${o}">
+        <button class="heart-btn${a.length ? "" : " zero"}" data-heart="${o}" aria-label="หัวใจของ${PEOPLE[o].name}">${heartSvg(o, a.length)}<span class="count">${a.length}</span></button>
+        <button class="jar-btn" data-jar="${o}" aria-label="โหลของ${PEOPLE[o].name}">${jarSvg(o, p)}</button>
+        <div class="label">${PEOPLE[o].icon} โหล${PEOPLE[o].name}</div>
+        <div class="hint">${hint}</div>
+      </div>`;
+    }).join("");
+    fresh.clear();
+    $("meBtn").textContent = me ? `${PEOPLE[me].icon} ${PEOPLE[me].name} · เปลี่ยน` : "เลือกว่าเป็นใคร";
+  }
+
+  function itemHtml(n) {
+    const [icon, label] = KINDS[n.kind] || KINDS.feel;
+    const cc = commentsOf(n.id).length;
+    const foot = n.accepted_at
+      ? `💗 ${PEOPLE[n.accepted_by]?.name || ""}ยอมรับ ${when(n.accepted_at)}`
+      : when(n.created_at);
+    return `<li><button class="item${unread(n) ? " unread" : ""}" data-note="${n.id}">
+      <p><span class="tag">${icon} ${label}</span>${esc(n.body)}</p>
+      <small>${foot}${cc ? ` · 💬 ${cc}` : ""}</small></button></li>`;
+  }
+
+  function renderSheet() {
+    if (!view) return;
+    const sheet = $("sheet");
+    const focused = document.activeElement?.dataset?.draft;
+    const caret = focused && document.activeElement.selectionStart;
+
+    if (view.type === "jar" || view.type === "heart") {
+      const o = view.owner, mine = o === me, them = PEOPLE[other(o)].name;
+      sheet.className = `sheet ${o}`;
+      const list = view.type === "jar" ? pending(o).slice().reverse() : accepted(o);
+      const head = view.type === "jar"
+        ? [`🫙 โหล${PEOPLE[o].name}`, mine ? `เขียนสิ่งที่รู้สึก หรืออยากได้จาก${them} — ${them}จะมาอ่านและคุยด้วย` : `แตะอ่านทีละใบ คุยกันจนเข้าใจ แล้วกดยอมรับ 💗`]
+        : [`💗 หัวใจ${PEOPLE[o].name}`, `สิ่งที่${PEOPLE[o].name}บอกไว้ และ${them}ยอมรับแล้ว`];
+      sheet.innerHTML = `
+        <div class="sheet-head"><h2>${head[0]}</h2><button data-close>ปิด</button></div>
+        <p class="lead">${head[1]}</p>
+        ${view.type === "jar" && mine ? `<div class="compose">
+          <div class="kinds">${Object.entries(KINDS).map(([k, [i, l]]) => `<button data-kind="${k}" class="${k === kind ? "on" : ""}">${i} ${l}</button>`).join("")}</div>
+          <textarea data-draft="new" rows="3" maxlength="1000" placeholder="${kind === "wish" ? `อยากให้${them}...` : "ตอนนี้รู้สึกว่า..."}"></textarea>
+          <div class="row"><button data-add>ใส่ลงโหล 🫙</button></div>
+        </div>` : ""}
+        <ul class="list">${list.length ? list.map(itemHtml).join("")
+          : `<li class="empty">${view.type === "jar" ? (mine ? "โหลยังว่าง ลองเขียนใบแรกดูสิ 💌" : `${PEOPLE[o].name}ยังไม่ได้ใส่อะไรเลย`) : "ยังไม่มีอะไรในหัวใจ ค่อย ๆ เติมกันนะ 🥰"}</li>`}</ul>`;
+    } else {
+      const n = notes.find((x) => x.id === view.id);
+      if (!n) { view = view.back; return renderSheet(); } // deleted on the other phone
+      const o = n.owner, mine = o === me, [icon, label] = KINDS[n.kind] || KINDS.feel;
+      seen[n.id] = commentsOf(n.id).length; store(SEEN_KEY, seen);
+      sheet.className = `sheet ${o}`;
+      const thread = commentsOf(n.id).map((c) =>
+        `<div class="bubble ${c.author} ${c.author === me ? "mine" : "theirs"}">${esc(c.body)}<small>${PEOPLE[c.author].icon} ${PEOPLE[c.author].name} · ${when(c.created_at)}</small></div>`).join("");
+      sheet.innerHTML = `
+        <div class="sheet-head"><button data-back>‹</button><h2>${icon} ${label}ของ${PEOPLE[o].name}</h2><button data-close>ปิด</button></div>
+        <div class="paper${n.accepted_at ? " accepted" : ""}">${esc(n.body)}</div>
+        <div class="meta">ใส่ลงโหล ${when(n.created_at)}${n.accepted_at ? ` · 💗 ${PEOPLE[n.accepted_by]?.name || ""}ยอมรับ ${when(n.accepted_at)}` : ""}</div>
+        <h3 class="thread-title">💬 คุยกันให้เข้าใจ</h3>
+        <div class="thread">${thread || `<p class="note-hint">ยังไม่มีคอมเมนต์ ${mine ? "" : "— ถามหรือเล่าความรู้สึกได้เลย"}</p>`}</div>
+        <div class="reply"><textarea data-draft="c${n.id}" rows="2" maxlength="1000" placeholder="${mine ? "อธิบายเพิ่ม..." : "สงสัยตรงไหน ถามได้เลย..."}"></textarea><button data-comment>ส่ง</button></div>
+        <div class="actions">
+          ${!n.accepted_at && !mine ? `<button class="accept" data-accept>💗 เข้าใจแล้ว ยอมรับ</button>
+            <p class="note-hint">กดแล้วกระดาษใบนี้จะลอยไปอยู่ในหัวใจ${PEOPLE[o].name}</p>` : ""}
+          ${!n.accepted_at && mine ? `<p class="note-hint">รอ${PEOPLE[other(o)].name}อ่านแล้วกดยอมรับนะ 🥺</p><button class="quiet" data-delete>เอาออกจากโหล</button>` : ""}
+        </div>`;
+    }
+    // put back what was being typed
+    sheet.querySelectorAll("[data-draft]").forEach((t) => { t.value = drafts[t.dataset.draft] || ""; });
+    if (focused) {
+      const t = sheet.querySelector(`[data-draft="${focused}"]`);
+      if (t) { t.focus(); try { t.setSelectionRange(caret, caret); } catch (e) {} }
+    }
+  }
+
+  function open(v) {
+    view = v;
+    renderSheet();
+    $("sheetBox").classList.add("show");
+    $("sheet").scrollTop = 0;
+  }
+  function close() { view = null; $("sheetBox").classList.remove("show"); renderShelf(); }
+
+  // a paper slip flies out of the jar and into the heart above it
+  function flyToHeart(owner) {
+    const jar = document.querySelector(`[data-jar="${owner}"]`), heart = document.querySelector(`[data-heart="${owner}"]`);
+    if (!jar || !heart) return;
+    const a = jar.getBoundingClientRect(), b = heart.getBoundingClientRect();
+    const el = document.createElement("div");
+    el.className = "flyer"; el.textContent = "💌";
+    el.style.left = a.left + a.width / 2 - 16 + "px";
+    el.style.top = a.top + a.height * .6 + "px";
+    document.body.appendChild(el);
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height * .6);
+    el.animate([
+      { transform: "translate(0,0) scale(.6) rotate(0)", opacity: 0 },
+      { transform: `translate(${dx * .2}px, ${dy * .5 - 30}px) scale(1.3) rotate(-20deg)`, opacity: 1, offset: .35 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.4) rotate(10deg)`, opacity: .2 },
+    ], { duration: 1100, easing: "cubic-bezier(.4,0,.2,1)" }).onfinish = () => {
+      el.remove();
+      heart.classList.remove("bump"); void heart.offsetWidth; heart.classList.add("bump");
+      for (let i = 0; i < 6; i++) {
+        const h = document.createElement("div");
+        h.className = "flyer"; h.textContent = "💗"; h.style.fontSize = "1.1rem";
+        h.style.left = b.left + b.width / 2 - 10 + "px"; h.style.top = b.top + b.height / 2 - 10 + "px";
+        document.body.appendChild(h);
+        const ang = (i / 6) * Math.PI * 2;
+        h.animate([{ transform: "translate(0,0)", opacity: 1 }, { transform: `translate(${Math.cos(ang) * 60}px, ${Math.sin(ang) * 60}px) scale(.5)`, opacity: 0 }],
+          { duration: 700, easing: "ease-out" }).onfinish = () => h.remove();
+      }
+    };
+  }
+
+  // ---------- data ----------
+  const fromNote = (r) => ({ ...r, id: Number(r.id) });
+  const fromComment = (r) => ({ ...r, id: Number(r.id), note_id: Number(r.note_id) });
+
+  async function loadAll() {
+    setStatus("☁️ กำลังซิงก์…");
+    const [a, b] = await Promise.all([
+      db.from("jar_notes").select("*").order("id"),
+      db.from("jar_comments").select("*").order("id"),
+    ]);
+    const err = a.error || b.error;
+    if (err) {
+      setStatus(err.code === "42P01" || err.code === "PGRST205" || /does not exist|schema cache/.test(err.message)
+        ? "⚠️ ยังไม่ได้สร้างตารางโหลบนเซิร์ฟเวอร์ (รัน jars.sql ก่อนนะ)"
+        : "⚠️ ออฟไลน์ — แสดงข้อมูลล่าสุดที่เครื่องนี้เห็น");
+      return;
+    }
+    const before = new Map(notes.map((n) => [n.id, n]));
+    notes = a.data.map(fromNote);
+    comments = b.data.map(fromComment);
+    store(CACHE_KEY, { notes, comments });
+    setStatus("☁️ ซิงก์แล้ว");
+    if (before.size) {
+      for (const n of notes) {
+        const old = before.get(n.id);
+        if (!old && !n.accepted_at) fresh.add(n.id);
+        if (!busy && old && !old.accepted_at && n.accepted_at) setTimeout(() => flyToHeart(n.owner), 100);
+      }
+    }
+    renderShelf();
+    renderSheet();
+  }
+
+  async function write(fn, okMsg) {
+    busy++;
+    try {
+      const { error } = await fn();
+      if (error) throw error;
+      if (okMsg) toast(okMsg);
+      await loadAll();
+      return true;
+    } catch (e) {
+      toast("😵 ส่งไม่สำเร็จ ลองใหม่อีกทีนะ");
+      return false;
+    } finally { busy--; }
+  }
+
+  async function addNote() {
+    const body = (drafts.new || "").trim();
+    if (!body) return toast("เขียนอะไรสักหน่อยก่อนนะ ✍️");
+    const owner = me;
+    if (await write(() => db.from("jar_notes").insert({ owner, kind, body }), "ใส่ลงโหลแล้ว 🫙")) {
+      drafts.new = "";
+      close();
+      const jar = document.querySelector(`[data-jar="${owner}"]`);
+      jar?.classList.remove("shake"); void jar?.offsetWidth; jar?.classList.add("shake");
+    }
+  }
+
+  async function addComment(id) {
+    const key = "c" + id, body = (drafts[key] || "").trim();
+    if (!body) return;
+    if (await write(() => db.from("jar_comments").insert({ note_id: id, author: me, body }))) {
+      drafts[key] = "";
+      renderSheet();
+      $("sheet").scrollTop = $("sheet").scrollHeight;
+    }
+  }
+
+  async function acceptNote(id) {
+    const n = notes.find((x) => x.id === id);
+    if (!n) return;
+    const ok = await write(() => db.from("jar_notes").update({ accepted_at: new Date().toISOString(), accepted_by: me }).eq("id", id).is("accepted_at", null));
+    if (ok) { close(); setTimeout(() => flyToHeart(n.owner), 150); }
+  }
+
+  async function deleteNote(id) {
+    if (!confirm("เอากระดาษใบนี้ออกจากโหลใช่มั้ย? (คอมเมนต์จะหายไปด้วย)")) return;
+    if (await write(() => db.from("jar_notes").delete().eq("id", id).is("accepted_at", null), "เอาออกแล้ว")) {
+      view = view?.back || null;
+      if (view) renderSheet(); else close();
+    }
+  }
+
+  // ---------- events ----------
+  $("shelf").addEventListener("click", (e) => {
+    const h = e.target.closest("[data-heart]"), j = e.target.closest("[data-jar]");
+    if (!me) return $("whoBox").classList.add("show");
+    if (h) open({ type: "heart", owner: h.dataset.heart });
+    if (j) open({ type: "jar", owner: j.dataset.jar });
+  });
+  $("sheet").addEventListener("input", (e) => { const d = e.target.dataset.draft; if (d) drafts[d] = e.target.value; });
+  $("sheet").addEventListener("click", (e) => {
+    const t = e.target.closest("button");
+    if (!t) return;
+    const d = t.dataset;
+    if ("close" in d) return close();
+    if ("back" in d) { view = view.back; renderSheet(); renderShelf(); return; }
+    if (d.kind) { kind = d.kind; return renderSheet(); }
+    if ("add" in d) return addNote();
+    if (d.note) { open({ type: "note", id: Number(d.note), back: view }); renderShelf(); return; }
+    if ("comment" in d) return addComment(view.id);
+    if ("accept" in d) return acceptNote(view.id);
+    if ("delete" in d) return deleteNote(view.id);
+  });
+  $("sheetBox").addEventListener("click", (e) => { if (e.target === $("sheetBox")) close(); });
+  $("meBtn").addEventListener("click", () => $("whoBox").classList.add("show"));
+  $("whoBox").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-me]");
+    if (!b) return;
+    me = b.dataset.me; store(ME_KEY, me);
+    $("whoBox").classList.remove("show");
+    renderShelf();
+    toast(`สวัสดี ${PEOPLE[me].name} ${PEOPLE[me].icon}`);
+  });
+
+  renderShelf();
+  if (!me) $("whoBox").classList.add("show");
+  if (!db) setStatus("⚠️ โหลดตัวซิงก์ไม่ได้ — ต้องต่อเน็ตก่อนนะ");
+  else {
+    db.channel("jars")
+      .on("postgres_changes", { event: "*", schema: "public", table: "jar_notes" }, () => { if (!busy) loadAll(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "jar_comments" }, () => { if (!busy) loadAll(); })
+      .subscribe((s) => { if (s === "SUBSCRIBED") loadAll(); });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) loadAll(); });
+  }
+</script>
+</body>
+</html>

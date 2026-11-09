@@ -54,6 +54,7 @@
     transition: transform .1s;
   }
   .trip-link:active { transform: scale(.97); }
+  .jar-link { background: linear-gradient(135deg, #ff9ab6, var(--pink)); box-shadow: 0 8px 24px rgba(255, 92, 138, .25); }
   .trip-link.locked { background: var(--empty); color: var(--muted); box-shadow: none; font-weight: 600; cursor: default; }
   .trip-link.locked:active { transform: none; }
   .trip-link.locked.nope { animation: nope .4s; }
@@ -604,6 +605,7 @@
     <ul class="log" id="log"></ul>
   </section>
 
+  <a class="card trip-link jar-link" href="jars.html">🫙 โหลใจของเรา</a>
   <a class="card trip-link" id="tripLink" href="japan.html">ไปญี่ปุ่นกันมั้ย 🧡</a>
 </main>
 
