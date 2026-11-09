@@ -174,8 +174,8 @@
     <ol class="how">
       <li><b>ใส่ลงโหลของตัวเอง</b> — ความรู้สึก 💭 หรือสิ่งที่อยากได้ 🎁</li>
       <li><b>อีกฝ่ายเปิดอ่าน</b> แล้วคุยกันในคอมเมนต์จนเข้าใจ</li>
-      <li>เข้าใจแล้วกด <b>ยอมรับ 💗</b> — กระดาษจะลอยเข้าไปอยู่ในหัวใจ</li>
-      <li>แตะ <b>หัวใจ</b> เพื่ออ่านด้วยกันว่าเรายอมรับอะไรกันไปแล้วบ้าง</li>
+      <li>เข้าใจแล้วกด <b>ยอมรับ 💗</b> — คำพูดนั้นจะลอยมาเก็บไว้ใน<b>หัวใจของคนที่ยอมรับ</b></li>
+      <li>แตะ <b>หัวใจ</b> เพื่ออ่านด้วยกันว่าแต่ละคนยอมรับอะไรเก็บไว้ในใจแล้วบ้าง</li>
     </ol>
     <div class="sync" id="sync"></div>
   </section>
@@ -229,7 +229,9 @@
   let fresh = new Set();         // slips that just landed, for the drop animation
 
   const pending = (o) => notes.filter((n) => n.owner === o && !n.accepted_at);
-  const accepted = (o) => notes.filter((n) => n.owner === o && n.accepted_at)
+  // a heart holds what that person accepted from the other one's jar
+  const keeper = (n) => n.accepted_by || other(n.owner);
+  const accepted = (o) => notes.filter((n) => n.accepted_at && keeper(n) === o)
     .sort((a, b) => Date.parse(b.accepted_at) - Date.parse(a.accepted_at));
   const commentsOf = (id) => comments.filter((c) => c.note_id === id);
   const unread = (n) => commentsOf(n.id).some((c) => c.author !== me) && (seen[n.id] ?? -1) < commentsOf(n.id).length
@@ -303,7 +305,7 @@
     const [icon, label] = KINDS[n.kind] || KINDS.feel;
     const cc = commentsOf(n.id).length;
     const foot = n.accepted_at
-      ? `💗 ${PEOPLE[n.accepted_by]?.name || ""}ยอมรับ ${when(n.accepted_at)}`
+      ? `จาก${PEOPLE[n.owner].name} ${PEOPLE[n.owner].icon} · 💗 ยอมรับเมื่อ ${when(n.accepted_at)}`
       : when(n.created_at);
     return `<li><button class="item${unread(n) ? " unread" : ""}" data-note="${n.id}">
       <p><span class="tag">${icon} ${label}</span>${esc(n.body)}</p>
@@ -322,7 +324,7 @@
       const list = view.type === "jar" ? pending(o).slice().reverse() : accepted(o);
       const head = view.type === "jar"
         ? [`🫙 โหล${PEOPLE[o].name}`, mine ? `เขียนสิ่งที่รู้สึก หรืออยากได้จาก${them} — ${them}จะมาอ่านและคุยด้วย` : `แตะอ่านทีละใบ คุยกันจนเข้าใจ แล้วกดยอมรับ 💗`]
-        : [`💗 หัวใจ${PEOPLE[o].name}`, `สิ่งที่${PEOPLE[o].name}บอกไว้ และ${them}ยอมรับแล้ว`];
+        : [`💗 ในใจ${PEOPLE[o].name}`, `คำพูดของ${them}ที่${PEOPLE[o].name}เข้าใจและยอมรับเก็บไว้ในใจแล้ว`];
       sheet.innerHTML = `
         <div class="sheet-head"><h2>${head[0]}</h2><button data-close>ปิด</button></div>
         <p class="lead">${head[1]}</p>
@@ -332,7 +334,7 @@
           <div class="row"><button data-add>ใส่ลงโหล 🫙</button></div>
         </div>` : ""}
         <ul class="list">${list.length ? list.map(itemHtml).join("")
-          : `<li class="empty">${view.type === "jar" ? (mine ? "โหลยังว่าง ลองเขียนใบแรกดูสิ 💌" : `${PEOPLE[o].name}ยังไม่ได้ใส่อะไรเลย`) : "ยังไม่มีอะไรในหัวใจ ค่อย ๆ เติมกันนะ 🥰"}</li>`}</ul>`;
+          : `<li class="empty">${view.type === "jar" ? (mine ? "โหลยังว่าง ลองเขียนใบแรกดูสิ 💌" : `${PEOPLE[o].name}ยังไม่ได้ใส่อะไรเลย`) : `${PEOPLE[o].name}ยังไม่ได้เก็บอะไรไว้ในใจ ค่อย ๆ เติมกันนะ 🥰`}</li>`}</ul>`;
     } else {
       const n = notes.find((x) => x.id === view.id);
       if (!n) { view = view.back; return renderSheet(); } // deleted on the other phone
@@ -350,7 +352,7 @@
         <div class="reply"><textarea data-draft="c${n.id}" rows="2" maxlength="1000" placeholder="${mine ? "อธิบายเพิ่ม..." : "สงสัยตรงไหน ถามได้เลย..."}"></textarea><button data-comment>ส่ง</button></div>
         <div class="actions">
           ${!n.accepted_at && !mine ? `<button class="accept" data-accept>💗 เข้าใจแล้ว ยอมรับ</button>
-            <p class="note-hint">กดแล้วกระดาษใบนี้จะลอยไปอยู่ในหัวใจ${PEOPLE[o].name}</p>` : ""}
+            <p class="note-hint">กดแล้วคำพูดนี้จะลอยมาเก็บไว้ในหัวใจ${PEOPLE[me].name}</p>` : ""}
           ${!n.accepted_at && mine ? `<p class="note-hint">รอ${PEOPLE[other(o)].name}อ่านแล้วกดยอมรับนะ 🥺</p><button class="quiet" data-delete>เอาออกจากโหล</button>` : ""}
         </div>`;
     }
@@ -370,9 +372,9 @@
   }
   function close() { view = null; $("sheetBox").classList.remove("show"); renderShelf(); }
 
-  // a paper slip flies out of the jar and into the heart above it
-  function flyToHeart(owner) {
-    const jar = document.querySelector(`[data-jar="${owner}"]`), heart = document.querySelector(`[data-heart="${owner}"]`);
+  // a paper slip flies out of the writer's jar and into the heart of the one who accepted it
+  function flyToHeart(n) {
+    const jar = document.querySelector(`[data-jar="${n.owner}"]`), heart = document.querySelector(`[data-heart="${keeper(n)}"]`);
     if (!jar || !heart) return;
     const a = jar.getBoundingClientRect(), b = heart.getBoundingClientRect();
     const el = document.createElement("div");
@@ -426,7 +428,7 @@
       for (const n of notes) {
         const old = before.get(n.id);
         if (!old && !n.accepted_at) fresh.add(n.id);
-        if (!busy && old && !old.accepted_at && n.accepted_at) setTimeout(() => flyToHeart(n.owner), 100);
+        if (!busy && old && !old.accepted_at && n.accepted_at) setTimeout(() => flyToHeart(n), 100);
       }
     }
     renderShelf();
@@ -473,7 +475,7 @@
     const n = notes.find((x) => x.id === id);
     if (!n) return;
     const ok = await write(() => db.from("jar_notes").update({ accepted_at: new Date().toISOString(), accepted_by: me }).eq("id", id).is("accepted_at", null));
-    if (ok) { close(); setTimeout(() => flyToHeart(n.owner), 150); }
+    if (ok) { close(); setTimeout(() => flyToHeart({ owner: n.owner, accepted_by: me }), 150); }
   }
 
   async function deleteNote(id) {
